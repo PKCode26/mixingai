@@ -4,6 +4,15 @@
 
 MixingAI wird on-prem auf einer Linux-VM bei amixon betrieben.
 
+Festgelegtes Betriebssystem:
+
+```text
+Distributor ID: Ubuntu
+Description:    Ubuntu 24.04.4 LTS
+Release:        24.04
+Codename:       noble
+```
+
 Geplante Hardware:
 
 ```text

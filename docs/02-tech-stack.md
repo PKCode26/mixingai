@@ -143,7 +143,7 @@ MVP-KI spaeter:
 Festgelegt:
 
 - Windows lokal fuer Entwicklung
-- Linux-VM bei amixon fuer Pilotbetrieb
+- Ubuntu 24.04.4 LTS auf Linux-VM bei amixon fuer Pilotbetrieb
 - PostgreSQL lokal auf derselben VM
 - App-Storage auf lokaler Platte/Volume
 - Docker Compose fuer den MVP
@@ -159,7 +159,6 @@ Vorhandene Zielhardware:
 
 Noch zu entscheiden:
 
-- genaue Linux-Distribution und Version
 - Ollama-Modelle fuer Chat und Embeddings
 
 ## Tests

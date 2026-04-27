@@ -211,7 +211,6 @@ Festgelegt fuer den Start:
 
 Noch offen:
 
-- genaue Linux-Distribution und Version
 - NVIDIA-Treiber / Container Runtime
 - welches konkrete Ollama-Chatmodell und Embeddingmodell verwendet werden
 
