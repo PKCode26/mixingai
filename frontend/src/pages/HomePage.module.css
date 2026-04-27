@@ -1,0 +1,41 @@
+.heading {
+  margin: 0 0 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1d23;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #dde1e7;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.tile:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59,130,246,.12);
+}
+
+.tileTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1d23;
+}
+
+.tileDesc {
+  font-size: .875rem;
+  color: #6b7280;
+}

@@ -1,0 +1,16 @@
+.page {
+  padding: .5rem 0;
+}
+
+.heading {
+  margin: 0 0 .75rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1d23;
+}
+
+.hint {
+  font-size: .9rem;
+  color: #6b7280;
+  margin: 0;
+}

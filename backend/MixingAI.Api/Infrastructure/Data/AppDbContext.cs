@@ -1,12 +1,17 @@
+using MixingAI.Api.Core.Auth;
+using MixingAI.Api.Core.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace MixingAI.Api.Infrastructure.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<User> Users => Set<User>();
+    public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("app_core");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }
 }
