@@ -44,6 +44,60 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 - [Known Bugs](docs/12-known-bugs.md)
 - [Ideen und Optimierungen](docs/13-ideen-und-optimierungen.md)
 
+## Struktur
+
+```
+mixingai/
+├── backend/MixingAI.Api/   ASP.NET Core 10 WebAPI + EF Core + Npgsql
+├── frontend/               React + TypeScript + Vite
+├── nginx/                  Nginx-Konfiguration (Reverse Proxy + TLS)
+├── docker-compose.yml      Produktion / Pilotbetrieb
+├── docker-compose.dev.yml  Lokale Entwicklung (nur DB + Ollama als Container)
+└── .env.example            Vorlage fuer lokale .env
+```
+
+## Lokale Entwicklung starten
+
+**Voraussetzung:** .NET 10 SDK, Node.js 20+, Docker Desktop
+
+```bash
+# 1. .env anlegen
+cp .env.example .env
+# POSTGRES_PASSWORD in .env setzen
+
+# 2. Datenbank und Ollama als Container starten
+docker compose -f docker-compose.dev.yml up -d
+
+# 3. Backend starten
+cd backend/MixingAI.Api
+dotnet run
+
+# 4. Frontend starten (neues Terminal)
+cd frontend
+npm install
+npm run dev
+```
+
+Backend laeuft auf http://localhost:5085 (Health: `/health`)
+Frontend laeuft auf http://localhost:5173
+
+## Produktion (Docker Compose)
+
+```bash
+# .env mit produktiven Werten befuellen
+# Nginx-Zertifikat unter nginx/certs/ ablegen (nicht in Git)
+
+docker compose up -d
+```
+
+## EF Core Migrationen
+
+```bash
+cd backend/MixingAI.Api
+dotnet ef migrations add <Name>
+dotnet ef database update
+```
+
 ## Grundsatz
 
 Die KI ist nicht die Datenbank und nicht das fuehrende System.

@@ -1,0 +1,109 @@
+services:
+
+  api:
+    build:
+      context: ./backend/MixingAI.Api
+      dockerfile: Dockerfile
+    container_name: mixingai-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=mixingai;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - Storage__DocumentRootPath=/app/storage/documents
+      - Storage__ImportRootPath=/app/storage/imports
+      - Features__EnableAdminSeedEndpoint=${FEATURE_ADMIN_SEED:-false}
+      - Features__EnableAiChat=${FEATURE_AI_CHAT:-false}
+      - Features__EnableOcrProvider=${FEATURE_OCR:-false}
+      - Ai__Provider=${AI_PROVIDER:-ollama}
+      - Ollama__BaseUrl=http://ollama:11434
+      - Ollama__ChatModel=${OLLAMA_CHAT_MODEL:-}
+      - Ollama__EmbeddingModel=${OLLAMA_EMBEDDING_MODEL:-}
+    volumes:
+      - documents:/app/storage/documents
+      - imports:/app/storage/imports
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mixingai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mixingai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mixingai-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_models:/root/.ollama
+    # GPU-Zugriff aktivieren wenn NVIDIA Container Runtime installiert ist:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: mixingai-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    networks:
+      - internal
+
+volumes:
+  pgdata:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /srv/mixingai/postgres
+  documents:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /srv/mixingai/storage/documents
+  imports:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /srv/mixingai/storage/imports
+  ollama_models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /srv/mixingai/ollama
+
+networks:
+  internal:
+    driver: bridge

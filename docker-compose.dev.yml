@@ -1,0 +1,34 @@
+# Lokale Entwicklung: nur PostgreSQL und Ollama als Container,
+# Backend und Frontend laufen direkt auf dem Host.
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mixingai-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mixingai_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mixingai-ollama-dev
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models_dev:/root/.ollama
+
+volumes:
+  pgdata_dev:
+  ollama_models_dev:

@@ -56,6 +56,11 @@ temp/
 *.bak
 *.dump
 
+# Nginx TLS-Zertifikate (nie in Git)
+nginx/certs/*.crt
+nginx/certs/*.key
+nginx/certs/*.pem
+
 # OS files
 Thumbs.db
 Desktop.ini
