@@ -60,3 +60,19 @@ Ollama__EmbeddingModel=CHANGE_ME
 ```
 
 Die Offline-KI soll mit Ollama laufen. KI-Zugriff laeuft nur ueber das Backend, nie direkt aus dem Frontend. Der Chatbot wird spaeter nur ueber Backend-Tools auf freigegebene Daten zugreifen.
+
+## Docker Compose
+
+Die `.env.example` enthaelt zusaetzlich Variablen fuer Docker Compose:
+
+```text
+POSTGRES_PASSWORD=CHANGE_ME
+FEATURE_ADMIN_SEED=false
+FEATURE_AI_CHAT=false
+FEATURE_OCR=false
+AI_PROVIDER=ollama
+OLLAMA_CHAT_MODEL=CHANGE_ME
+OLLAMA_EMBEDDING_MODEL=CHANGE_ME
+```
+
+In Produktion duerfen echte Werte nur in `.env` oder in der Deployment-Umgebung liegen. `.env` bleibt aus dem Git ausgeschlossen.

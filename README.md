@@ -21,7 +21,7 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 
 ## Kernbereiche
 
-1. User, Rollen und Rechte
+1. User und einfache Anmeldung
 2. Ops / Datenqualitaet
 3. DMS / Dokumentenarchiv
 4. Versuchs- und Rezeptdatenbank
@@ -43,17 +43,18 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 - [Massnahmenplan und Readiness](docs/11-massnahmenplan-readiness.md)
 - [Known Bugs](docs/12-known-bugs.md)
 - [Ideen und Optimierungen](docs/13-ideen-und-optimierungen.md)
+- [Implementierungsstand](docs/14-implementierungsstand.md)
 
 ## Struktur
 
 ```
 mixingai/
-├── backend/MixingAI.Api/   ASP.NET Core 10 WebAPI + EF Core + Npgsql
-├── frontend/               React + TypeScript + Vite
-├── nginx/                  Nginx-Konfiguration (Reverse Proxy + TLS)
-├── docker-compose.yml      Produktion / Pilotbetrieb
-├── docker-compose.dev.yml  Lokale Entwicklung (nur DB + Ollama als Container)
-└── .env.example            Vorlage fuer lokale .env
+|-- backend/MixingAI.Api/   ASP.NET Core 10 WebAPI + EF Core + Npgsql
+|-- frontend/               React + TypeScript + Vite
+|-- nginx/                  Nginx-Konfiguration (Reverse Proxy + TLS)
+|-- docker-compose.yml      Produktion / Pilotbetrieb
+|-- docker-compose.dev.yml  Lokale Entwicklung (nur DB + Ollama als Container)
+`-- .env.example            Vorlage fuer lokale .env
 ```
 
 ## Lokale Entwicklung starten

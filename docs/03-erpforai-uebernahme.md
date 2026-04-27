@@ -10,6 +10,30 @@ Ziel:
 
 Nicht das ERP kopieren, sondern die passenden Bausteine extrahieren und fuer MixingAI vereinfachen.
 
+## Aktueller Stand
+
+Die Auth-Grundlage ist im MixingAI-Repo bereits angelegt:
+
+```text
+backend/MixingAI.Api/Core/Auth/AuthSession.cs
+backend/MixingAI.Api/Core/Users/User.cs
+backend/MixingAI.Api/Core/Security/CurrentUserService.cs
+backend/MixingAI.Api/Core/Security/PasswordHashingService.cs
+backend/MixingAI.Api/Core/Security/SessionTokenService.cs
+backend/MixingAI.Api/Core/Endpoints/AuthEndpoints.cs
+backend/MixingAI.Api/Infrastructure/Data/AppDbContext.cs
+```
+
+Sie ist bewusst kleiner als `erpforai`:
+
+- keine Rollenverwaltung im MVP
+- keine Gruppen
+- keine Department-/Employee-Bezuege
+- `IsAdmin` nur fuer einfache Admin-Unterscheidung
+- alle normalen angemeldeten Nutzer duerfen fachlich erstmal alles
+
+Die DMS-/Document-Vault-Uebernahme steht noch aus.
+
 ## Uebernehmen
 
 ### Auth und Sessions
@@ -43,7 +67,7 @@ Anpassen:
 
 ### Rollen und Rechte
 
-Relevante Dateien:
+Urspruenglich relevante Dateien:
 
 ```text
 src/ERP.Core/Domain/Roles/Role.cs
@@ -54,36 +78,20 @@ src/ERP.Core/Authorization/PermissionCodes.cs
 src/ERP.Api/Authorization/EndpointAuthorization.cs
 ```
 
-Uebernahme:
+Aktuelle Entscheidung:
 
-- `User`
+- Rollen-/Permission-Modell aus `erpforai` wird im MVP nicht uebernommen.
+- MixingAI nutzt einfache Anmeldung und optionales `IsAdmin`.
+- Eine spaetere Rechteerweiterung bleibt moeglich, ist aber kein MVP-Ziel.
+
+Nicht uebernehmen:
+
 - `Role`
 - `Permission`
 - `UserRole`
 - `RolePermission`
-- `RequirePermissionAsync`
-- `RequireAnyPermissionAsync`
-
-Anpassen:
-
-- PermissionCodes neu fuer MixingAI definieren
-- keine ERP-Module uebernehmen
-- Admin-Rolle beibehalten
-
-Startrechte:
-
-```text
-admin.manage
-document.upload
-document.read
-document.manage
-import.review
-recipe.read
-recipe.manage
-material.manage
-analysis.run
-ai.chat
-```
+- komplexe PermissionCodes
+- Rollen-/Rechte-UI
 
 ### DMS-Grundmodell
 
@@ -104,7 +112,7 @@ Uebernehmen:
 - MIME-Type
 - Dateigroesse
 - SHA256-Checksumme
-- sichere Pfadauflösung im Storage-Service
+- sichere Pfadaufloesung im Storage-Service
 - Archivieren statt hart loeschen
 
 Anpassen:
@@ -152,47 +160,38 @@ MixingAI soll kleiner und fokussierter sein. Zu viel ERP-Struktur wuerde das Pro
 
 ## Zielstruktur in MixingAI
 
-Vorschlag:
+Aktuelle Struktur:
 
 ```text
-src/
-  MixingAI.Api/
-  MixingAI.Core/
-  MixingAI.Dms/
-  MixingAI.Import/
-  MixingAI.Recipes/
-  MixingAI.Infrastructure/
-  MixingAI.SharedKernel/
-tests/
-  MixingAI.Tests/
-```
+backend/MixingAI.Api/
+  Core/
+  Dms/
+  Import/
+  Recipe/
+  Ai/
+  Infrastructure/
 
-Alternative fuer schnellen MVP:
-
-```text
-src/
-  MixingAI.Api/
-  MixingAI.Domain/
-  MixingAI.Infrastructure/
-tests/
-  MixingAI.Tests/
+frontend/
+nginx/
+docker-compose.yml
+docker-compose.dev.yml
 ```
 
 Empfehlung:
 
-Fuer den Start die zweite, kleinere Struktur. Modular schneiden, aber nicht zu viele Projekte erzeugen, bevor die Fachlogik stabil ist.
+Die aktuelle Single-API-Struktur ist fuer den MVP passend. Fachbereiche bleiben als Ordner getrennt, ohne frueh mehrere .NET-Projekte zu erzwingen.
 
 ## Migrationsstrategie
 
-1. Neues .NET-Projekt anlegen.
-2. Shared Auditing uebernehmen.
-3. User/Role/Permission/AuthSession uebernehmen und umbenennen.
-4. AuthEndpoints auf MixingAI-Namespace und Rechte anpassen.
-5. DbContext mit Core-Tabellen erstellen.
-6. DMS-Entities vereinfacht uebernehmen.
-7. Storage-Service uebernehmen und umbenennen.
-8. Import- und Rezeptmodule neu bauen.
-9. Erst danach KI-Service anbinden.
+1. Neues .NET-Projekt anlegen. `erledigt`
+2. Shared Auditing uebernehmen. `erledigt`
+3. User/AuthSession uebernehmen und vereinfachen. `erledigt`
+4. AuthEndpoints auf MixingAI-Namespace anpassen. `erledigt`
+5. DbContext mit Core-Tabellen erstellen. `erledigt`
+6. DMS-Entities vereinfacht uebernehmen. `offen`
+7. Storage-Service uebernehmen und umbenennen. `offen`
+8. Import- und Rezeptmodule neu bauen. `offen`
+9. KI-Service fuer Ollama anbinden. `offen`
 
 ## Risiken beim Kopieren
 

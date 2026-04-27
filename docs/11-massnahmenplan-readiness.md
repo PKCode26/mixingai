@@ -18,6 +18,23 @@ Technische Basis
 
 Die Review-Maske ist der zentrale Produktbaustein. KI kommt erst, wenn die Datenbasis und die Such-/Filterfunktionen funktionieren.
 
+## Aktueller Status
+
+Stand im Repo:
+
+- Phase 1 ist teilweise umgesetzt: Backend, Frontend, Docker Compose, Nginx Skeleton und Env-Vorlage existieren.
+- Phase 2 ist teilweise umgesetzt: Auth-Grundlage, Login, Protected Route und Shared Shell existieren.
+- Phase 3 ist der naechste groessere Schritt: Document Vault mit Upload, Storage, Hash und Dokumentliste.
+
+Offene untracked Dateien im Arbeitsbaum muessen separat entschieden werden:
+
+```text
+.claude/
+backend/MixingAI.Api/.dockerignore
+```
+
+Diese Doku nimmt sie nicht automatisch in den Commit auf.
+
 ## Phase 1: Projekt-Scaffold
 
 Ziel:

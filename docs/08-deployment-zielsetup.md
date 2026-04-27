@@ -116,6 +116,27 @@ Nginx sollte mindestens setzen:
 - Security Header fuer interne Webanwendung
 - Timeouts passend fuer grosse Uploads und Exporte
 
+Aktueller Stand im Repo:
+
+```text
+nginx/nginx.conf
+```
+
+Die Konfiguration enthaelt bereits:
+
+- HTTP zu HTTPS Redirect
+- `server_name mixingai.amixon.local`
+- TLS-Dateipfade unter `/etc/nginx/certs`
+- Upload-Limit fuer PDF/Excel
+- Proxy auf `api:8080`
+- Basis-Security-Header
+
+Noch offen:
+
+- Zertifikatsdateien aus der amixon-Umgebung bereitstellen
+- Zertifikate nicht ins Git aufnehmen
+- finalen Hostnamen im DNS/internen Netz aufloesen
+
 ## Storage
 
 Persistente Pfade:
@@ -184,7 +205,7 @@ Festlegung:
 - DB und Datei-Storage gemeinsam sichern
 - Retention nach ueblichem Schema:
   - taegliche Backups fuer kurzfristige Wiederherstellung
-  - wöchentliche Backups fuer mittlere Frist
+  - woechentliche Backups fuer mittlere Frist
   - monatliche Backups fuer laengere Aufbewahrung
 - genaue Aufbewahrungsdauer mit amixon final abstimmen
 
