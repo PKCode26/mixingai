@@ -41,6 +41,8 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 - [UI- und Produktleitplanken](docs/09-ui-und-produktleitplanken.md)
 - [Datenmodell-Inputfaktoren](docs/10-datenmodell-inputfaktoren.md)
 - [Massnahmenplan und Readiness](docs/11-massnahmenplan-readiness.md)
+- [Known Bugs](docs/12-known-bugs.md)
+- [Ideen und Optimierungen](docs/13-ideen-und-optimierungen.md)
 
 ## Grundsatz
 
