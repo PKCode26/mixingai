@@ -4,6 +4,21 @@ Dieses Dokument sammelt fruehe Produkt- und Architekturentscheidungen, die vor d
 
 ## Bereits entschieden
 
+### MVP nur mit einfacher Anmeldung
+
+Im MVP gibt es nur einfache Benutzeranmeldung.
+
+Nicht vorgesehen:
+
+- keine Gruppenverwaltung
+- keine komplexe Rechte-Matrix
+- keine fachlichen Zugriffsbeschraenkungen pro Modul
+- keine Mandanten-/Department-Scopes
+
+Grundsatz:
+
+Alle angemeldeten Benutzer duerfen im MVP grundsaetzlich alles. Die Installation laeuft auf einer geschlossenen VM und wird nur von wenigen Personen genutzt.
+
 ### Kein Dokumenten-Chat als Kern
 
 MixingAI wird nicht als RAG-Chatbot ueber einen ungeordneten Dokumentenhaufen gebaut.
@@ -55,6 +70,24 @@ Folgen:
 - KI-/OCR-Provider werden austauschbar gehalten.
 - Die Anwendung funktioniert auch ohne KI.
 - Externe Verarbeitung darf nur explizit aktiviert werden.
+
+Festgelegt:
+
+- Betrieb auf einer Linux-VM bei amixon.
+- Keine produktiven Kundendaten in externe KI-Systeme.
+- Keine produktiven Kundendaten in externe Cloud-OCR.
+- KI-Suche bleibt Ziel des Produkts, muss aber lokal/on-prem laufen.
+
+### Leichte Dokumentversionierung
+
+Die Dokumente sind keine gelenkten Dokumente.
+
+Grundsatz:
+
+- Jeder Versuch hat im Normalfall eine eigene Datei.
+- Versionierung ist nicht der zentrale Fachprozess.
+- Eine neue Version ist trotzdem hilfreich, wenn eine Datei korrigiert oder erneut importiert wird.
+- Es braucht keinen grossen DMS-Freigabeworkflow.
 
 ## Versuchsprotokolle als Referenz
 
@@ -128,19 +161,18 @@ Da Protokolle nicht immer gleich aufgebaut sind, braucht der Import:
 
 ### 1. MVP-Schnitt
 
-Welche Funktionen muessen in der ersten lauffaehigen Version enthalten sein?
-
-Empfohlener MVP:
+Festgelegt fuer den MVP:
 
 - Login
 - Dokumentupload
 - kontrollierter Storage
 - PDF-Dokument als Versuchsprotokoll erfassen
 - Excel-Uebersicht importieren oder referenzieren
-- Review-Maske fuer Versuchsdaten
+- gute Review-Maske fuer eingelesene Daten gegen Originaldokument
 - einfache Versuchsdatenbank
 - Rezept-/Mischdaten falls vorhanden
 - Suche/Filter nach Kunde, Produkt, Versuch, Maschine, Mischertyp
+- Excel-Export mit Quellenverweisen
 
 Nicht im MVP:
 
@@ -159,33 +191,38 @@ Single-Tenant im MVP, aber Datenmodell so schneiden, dass `tenant_id` spaeter mo
 
 ### 3. Betriebsmodell
 
-Wo laeuft die Anwendung?
+Festgelegt:
 
-Optionen:
-
-- Kunde on-prem
-- private VM
-- eigener Server
-- Docker/Compose
-- spaeter Kubernetes nur bei echtem Bedarf
-
-Diese Entscheidung beeinflusst OCR, KI, Backup, Updates und Storage.
+- Linux-VM bei amixon
+- PostgreSQL und App-Storage werden dort betrieben
+- KI/OCR-Komponenten muessen ebenfalls dort oder in derselben on-prem Umgebung laufen
+- Docker/Compose ist naheliegend, aber noch nicht final entschieden
 
 ### 4. Cloud-Verbot genau definieren
 
-Muss wirklich alles offline/on-prem bleiben, oder sind einzelne externe Dienste nach Freigabe erlaubt?
+Festgelegt fuer den Start:
 
-Zu klaeren:
+- keine Cloud-KI fuer produktive Daten
+- keine Cloud-OCR fuer produktive Daten
+- externe Dienste nur fuer synthetische oder explizit freigegebene Testdaten
+- Standardkonfiguration bleibt offline/on-prem
 
-- duerfen Dokumente an Cloud-OCR?
-- duerfen Metadaten an KI?
-- duerfen anonymisierte Auszuege an KI?
-- muss ein lokales LLM verwendet werden?
-- reicht "KI standardmaessig aus"?
+Noch offen:
+
+- welches lokale LLM
+- ob die Linux-VM GPU hat
+- ob KI auf derselben VM oder auf separater interner GPU-Maschine laeuft
 
 ### 5. Dokument- und Versionierungsregeln
 
-Was ist:
+Grundsatz:
+
+- jeder Versuch ist normalerweise ein eigenes Dokument
+- Versionierung bleibt leichtgewichtig
+- Dubletten werden ueber Hash erkannt
+- erneuter Upload kann als Korrekturversion abgebildet werden
+
+Noch zu definieren:
 
 - ein neues Dokument?
 - eine neue Version?
@@ -196,9 +233,17 @@ Was ist:
 
 ### 6. Freigaberegeln
 
-Welche Felder muessen geprueft sein, bevor ein Versuch oder Rezept produktiv wird?
+Wichtigster MVP-Prozess:
 
-Beispiele:
+Die Review-Maske muss klar zeigen:
+
+- was eingelesen wurde
+- wo es im Dokument steht
+- wie sicher die Extraktion ist
+- was korrigiert wurde
+- ob Pflichtfelder fehlen
+
+Vor Freigabe sollte mindestens geprueft sein:
 
 - Versuchsnummer vorhanden
 - Kunde gesetzt
@@ -211,9 +256,7 @@ Beispiele:
 
 ### 7. Such- und Filteranforderungen
 
-Welche Abfragen sind fuer den Kunden wirklich wichtig?
-
-Beispiele:
+Startfilter:
 
 - nach Kunde
 - nach Produkt
@@ -226,9 +269,19 @@ Beispiele:
 - nach Ergebnis-/Pruefwert
 - nach Zeitraum
 
+Grundsatz:
+
+Filter muessen spaeter erweiterbar sein. Welche Filter wirklich wichtig werden, ergibt sich nach den ersten importierten Versuchen.
+
 ### 8. Rohstoff- und Bezeichnungsnormalisierung
 
-Welche Stammdaten sind fuehrend?
+Es gibt noch keine sichere Stammdatenbasis.
+
+Grundsatz:
+
+- Rohstoffe, Maschinenbezeichnungen und Synonyme werden zuerst aus den Dokumenten herausgelesen.
+- Die Review-Maske muss daraus Vorschlaege machen.
+- Bestaetigte Zuordnungen werden als Aliase/Stammdaten gespeichert.
 
 Zu klaeren:
 
@@ -240,7 +293,7 @@ Zu klaeren:
 
 ### 9. Echte Testdaten
 
-Fuer den Pilot werden echte Dateien benoetigt.
+Fuer den Pilot werden echte Dateien benoetigt, aber sie duerfen nicht in externe KI-/Cloud-Systeme gelangen.
 
 Empfehlung:
 
@@ -250,6 +303,13 @@ Empfehlung:
 - typische Excel-Uebersichten
 - alte Benennungsvarianten
 - Sonderfaelle mit mehreren Geraeten
+
+Vorgehen:
+
+- echte Testdaten bleiben bei amixon/on-prem
+- fuer Entwicklung ausserhalb der Kundenumgebung werden synthetische oder anonymisierte Dateien genutzt
+- Parser- und UI-Tests koennen mit kuenstlich erstellten Fixtures laufen
+- fachliche Abnahme laeuft mit echten Dateien auf der amixon-VM
 
 ### 10. Backup und Restore
 
@@ -265,28 +325,25 @@ Zu klaeren:
 
 ### 11. Audit-Tiefe
 
-Welche Aktionen muessen nachvollziehbar sein?
+Audit ist im MVP nur minimal relevant, da es interne Daten und wenige Benutzer sind.
 
-Empfehlung:
+Minimal erfassen:
 
 - Upload
 - Datei-Version
 - Importlauf
-- Extraktionsvorschlag
 - manuelle Korrektur
 - Freigabe
 - Archivierung
-- Rohstoff-Mapping
-- Rezept-/Versuchsaenderung
-- KI-Abfrage optional, wenn aktiviert
 
 ### 12. Export
 
-Welche Daten muessen wieder raus?
+Festgelegt:
 
-Moeglich:
+- Excel-Export ist wichtig
+- Export soll Quellenverweise enthalten
 
-- Excel-Export fuer Suchergebnisse
-- PDF-Report fuer Versuch/Rezept
+Optional spaeter:
+
 - CSV fuer Analysen
-- Export inklusive Quellenverweisen
+- PDF-Report fuer Versuch/Rezept

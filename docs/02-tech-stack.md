@@ -140,13 +140,19 @@ MVP-KI spaeter:
 
 ## Deployment
 
-Naheliegend:
+Festgelegt:
 
 - Windows lokal fuer Entwicklung
-- Linux VM oder Windows Server fuer Pilotbetrieb
+- Linux-VM bei amixon fuer Pilotbetrieb
 - PostgreSQL separat oder auf derselben Pilotmaschine
 - App-Storage auf lokaler Platte/Volume
 - Backup fuer DB und Storage gemeinsam planen
+
+Noch zu entscheiden:
+
+- Docker/Compose ja/nein
+- KI auf derselben VM oder separater interner GPU-Maschine
+- verfuegbare GPU/VRAM fuer lokale KI
 
 ## Tests
 

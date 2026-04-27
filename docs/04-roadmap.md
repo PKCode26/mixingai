@@ -20,14 +20,14 @@ Ziele:
 
 - .NET Backend anlegen
 - PostgreSQL anbinden
-- User, Rollen, Rechte, Sessions
+- User und Sessions
 - Login/Logout/Me
 - einfache Admin-Seeds
 
 Ergebnis:
 
 - geschuetzte Anwendung
-- Basisrechte fuer DMS, Import, Rezeptdaten und KI
+- einfache Anmeldung ohne komplexe Rechtekontrolle
 
 ## Phase 2: DMS / Document Vault
 
@@ -124,6 +124,7 @@ Ziele:
 
 - KI-Service im Backend
 - Tool-Schnittstellen fuer Suche und Vergleich
+- lokales/on-prem LLM
 - Chat nur auf freigegebenen Daten
 - Quellenpflicht
 - Rohstoff-Mapping-Vorschlaege
