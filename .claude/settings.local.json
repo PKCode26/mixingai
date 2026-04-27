@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet --version)",
+      "Bash(npm --version)",
+      "Bash(dotnet new *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet build *)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Read(//c/devprojekte/erpforai/**)",
+      "Bash(grep -E \"\\\\.\\(cs|tsx?\\)$\")",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet tool *)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
