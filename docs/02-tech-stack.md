@@ -148,6 +148,8 @@ Festgelegt:
 - App-Storage auf lokaler Platte/Volume
 - Docker Compose fuer den MVP
 - Ollama lokal auf derselben VM
+- Nginx als Reverse Proxy
+- TLS/HTTPS fuer Browserzugriff
 - Backup fuer DB und Storage gemeinsam planen
 
 Vorhandene Zielhardware:

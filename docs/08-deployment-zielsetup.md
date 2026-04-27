@@ -44,6 +44,8 @@ Festlegung:
 - PostgreSQL lokal auf derselben VM
 - Ollama lokal auf derselben VM
 - Dokument- und Import-Storage auf lokalem NVMe-Volume
+- Nginx als Reverse Proxy
+- TLS/HTTPS fuer den Browserzugriff
 - keine externen Cloud-Dienste fuer produktive Daten
 
 ## Vorgeschlagene Container
@@ -67,7 +69,7 @@ mixingai-worker
   im MVP kann der Worker auch im API-Prozess als Hosted Service laufen
 
 mixingai-nginx
-  optional Reverse Proxy / TLS Terminierung
+  Reverse Proxy / TLS Terminierung
 ```
 
 MVP-Empfehlung:
@@ -77,8 +79,41 @@ API + Frontend in einem Deployment
 PostgreSQL als eigener Container
 Ollama als eigener Container
 Worker zuerst im API-Prozess
-Nginx nur wenn TLS/Reverse Proxy sauber getrennt werden soll
+Nginx als fester Einstiegspunkt fuer HTTPS
 ```
+
+## Nginx und TLS
+
+Festlegung:
+
+- Browserzugriff laeuft ueber HTTPS.
+- Nginx terminiert TLS.
+- Nginx leitet intern an die ASP.NET-App weiter.
+- Die ASP.NET-App ist intern nicht direkt aus dem Netzwerk erreichbar.
+
+Zielbild:
+
+```text
+Browser
+  -> https://mixingai.<intern>
+  -> Nginx
+  -> mixingai-api
+```
+
+TLS-Zertifikat:
+
+- bevorzugt ueber interne amixon-IT / interne CA
+- alternativ ein intern verwaltetes Zertifikat fuer den Hostnamen
+- Zertifikatsablage nicht im Git
+- Zertifikatserneuerung im Betriebskonzept festhalten
+
+Nginx sollte mindestens setzen:
+
+- HTTPS Redirect von HTTP auf HTTPS
+- sinnvolles Upload-Limit fuer PDF/Excel-Dateien
+- Proxy-Header fuer ASP.NET
+- Security Header fuer interne Webanwendung
+- Timeouts passend fuer grosse Uploads und Exporte
 
 ## Storage
 
@@ -147,6 +182,6 @@ Ein DB-Backup ohne Dokument-Storage ist wertlos. Ein Dokument-Storage ohne DB is
 - genaue Linux-Distribution und Version
 - Zugriff auf NVIDIA-Treiber und Container Runtime
 - gewuenschte Domain / interner Hostname
-- TLS-Zertifikat intern ja/nein
+- TLS-Zertifikat aus interner CA oder anderer amixon-Quelle
 - Backup-Ziel
 - Wartungsfenster fuer Updates

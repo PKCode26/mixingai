@@ -198,6 +198,7 @@ Festgelegt:
 - PostgreSQL und App-Storage werden dort betrieben
 - KI/OCR-Komponenten laufen ebenfalls dort oder in derselben on-prem Umgebung
 - Docker Compose wird fuer den MVP verwendet
+- Nginx und TLS/HTTPS werden fuer Datenschutz und sauberen Betrieb fest eingeplant
 - Zielhardware: AMD Ryzen Threadripper 7960X, 128 GB RAM, 2 x 2 TB NVMe RAID1, NVIDIA RTX PRO 6000
 
 ### 4. Cloud-Verbot genau definieren
@@ -212,6 +213,7 @@ Festgelegt fuer den Start:
 Noch offen:
 
 - NVIDIA-Treiber / Container Runtime
+- interner Hostname und TLS-Zertifikat aus amixon-Umgebung
 - welches konkrete Ollama-Chatmodell und Embeddingmodell verwendet werden
 
 ### 5. Dokument- und Versionierungsregeln
