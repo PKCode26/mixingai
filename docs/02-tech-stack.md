@@ -13,7 +13,7 @@ ORM:        EF Core + Npgsql
 Storage:    lokaler App-Storage, spaeter S3/MinIO/Azure Blob austauschbar
 Jobs:       Background Worker im Backend, spaeter Hangfire/Quartz bei Bedarf
 OCR:        austauschbarer Provider
-KI:         separater Backend-Service, kein Frontend-Key
+KI:         Ollama on-prem, Zugriff nur ueber Backend
 ```
 
 ## Backend
@@ -151,7 +151,7 @@ Festgelegt:
 Noch zu entscheiden:
 
 - Docker/Compose ja/nein
-- KI auf derselben VM oder separater interner GPU-Maschine
+- Ollama auf derselben VM oder separater interner GPU-Maschine
 - verfuegbare GPU/VRAM fuer lokale KI
 
 ## Tests

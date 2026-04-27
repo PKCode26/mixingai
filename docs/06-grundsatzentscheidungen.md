@@ -77,6 +77,7 @@ Festgelegt:
 - Keine produktiven Kundendaten in externe KI-Systeme.
 - Keine produktiven Kundendaten in externe Cloud-OCR.
 - KI-Suche bleibt Ziel des Produkts, muss aber lokal/on-prem laufen.
+- Die Offline-KI soll mit Ollama betrieben werden.
 
 ### Leichte Dokumentversionierung
 
@@ -209,9 +210,9 @@ Festgelegt fuer den Start:
 
 Noch offen:
 
-- welches lokale LLM
 - ob die Linux-VM GPU hat
 - ob KI auf derselben VM oder auf separater interner GPU-Maschine laeuft
+- welches konkrete Ollama-Chatmodell und Embeddingmodell verwendet werden
 
 ### 5. Dokument- und Versionierungsregeln
 

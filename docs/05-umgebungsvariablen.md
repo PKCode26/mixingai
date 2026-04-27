@@ -53,9 +53,10 @@ OCR-Provider werden austauschbar gehalten. Azure Document Intelligence ist ein m
 ## KI
 
 ```text
-Ai__Provider=disabled
-OpenAI__ApiKey=
-OpenAI__Model=
+Ai__Provider=ollama
+Ollama__BaseUrl=http://localhost:11434
+Ollama__ChatModel=CHANGE_ME
+Ollama__EmbeddingModel=CHANGE_ME
 ```
 
-KI-Zugangsdaten duerfen nie im Frontend landen. Der Chatbot wird spaeter nur ueber Backend-Tools auf freigegebene Daten zugreifen.
+Die Offline-KI soll mit Ollama laufen. KI-Zugriff laeuft nur ueber das Backend, nie direkt aus dem Frontend. Der Chatbot wird spaeter nur ueber Backend-Tools auf freigegebene Daten zugreifen.

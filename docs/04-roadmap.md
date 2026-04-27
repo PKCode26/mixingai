@@ -124,7 +124,7 @@ Ziele:
 
 - KI-Service im Backend
 - Tool-Schnittstellen fuer Suche und Vergleich
-- lokales/on-prem LLM
+- lokales/on-prem LLM via Ollama
 - Chat nur auf freigegebenen Daten
 - Quellenpflicht
 - Rohstoff-Mapping-Vorschlaege

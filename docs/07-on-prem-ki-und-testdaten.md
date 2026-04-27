@@ -32,11 +32,11 @@ Der LLM-Service spricht nicht direkt mit der Datenbank. Das Backend ruft definie
 
 Die KI formuliert Antworten und hilft beim Suchen, aber die Daten kommen aus dem Backend.
 
-## Lokale LLM-Optionen
+## Lokaler LLM-Provider
 
-### Pilot: Ollama
+### Festgelegt: Ollama
 
-Ollama ist fuer einen Pilot attraktiv, weil es lokale Modelle einfach bereitstellt und eine lokale HTTP-API anbietet.
+Die Offline-KI soll mit Ollama betrieben werden. Ollama stellt lokale Modelle ueber eine lokale HTTP-API bereit und passt deshalb zum On-Prem-Ansatz.
 
 Einsatz:
 
@@ -44,27 +44,26 @@ Einsatz:
 - lokale Entwicklung
 - erste Chat-/Suchassistenz
 - kleine bis mittlere Modelle
+- lokale Embeddings, sofern ein passendes Embeddingmodell verfuegbar ist
 
 Risiko:
 
 - Performance haengt stark von VM/CPU/GPU ab
-- fuer produktiven Mehrbenutzerbetrieb eventuell spaeter zu einfach
+- Modellqualitaet haengt vom gewaehlten lokalen Modell ab
+- fuer produktiven Mehrbenutzerbetrieb muss Last und Antwortzeit getestet werden
 
-### Produktiver: vLLM
+Konfiguration:
 
-vLLM ist interessant, wenn eine GPU verfuegbar ist und ein OpenAI-kompatibler lokaler Server gewuenscht ist.
+```text
+Ai__Provider=ollama
+Ollama__BaseUrl=http://localhost:11434
+Ollama__ChatModel=...
+Ollama__EmbeddingModel=...
+```
 
-Einsatz:
+### Spaetere Alternative
 
-- interne LLM-API
-- bessere Serving-Performance
-- OpenAI-kompatible Client-Schnittstelle
-- geeignet fuer separaten GPU-Host
-
-Risiko:
-
-- mehr Infrastrukturaufwand
-- GPU/VRAM muss geplant werden
+vLLM bleibt nur eine spaetere Alternative, falls Ollama fuer Last, Antwortzeit oder Modellbetrieb nicht reicht.
 
 ## Lokale OCR- und Dokumentanalyse
 
@@ -154,6 +153,7 @@ Vor Implementierung klaeren:
 
 - Hat die amixon-Linux-VM eine GPU?
 - Falls nein: reicht CPU-LLM fuer die erwartete Nutzung?
-- Soll KI auf derselben VM oder separatem internen GPU-Host laufen?
+- Soll Ollama auf derselben VM oder separatem internen GPU-Host laufen?
+- Welches Ollama-Chatmodell und welches Embeddingmodell werden freigegeben?
 - Welche OCR-Qualitaet liefern Tesseract, PaddleOCR und Docling auf echten Beispiel-PDFs?
 - Welche Antwortzeit ist fuer die Suche akzeptabel?
