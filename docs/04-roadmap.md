@@ -79,10 +79,12 @@ Ergebnis:
 - fachlich gepruefte Daten
 - keine ungeprueften OCR-Ergebnisse in der Rezeptdatenbank
 
-## Phase 5: Rezeptdatenbank
+## Phase 5: Versuchs- und Rezeptdatenbank
 
 Ziele:
 
+- Versuche
+- Versuchsdokumente
 - Rezepte
 - Rezeptversionen
 - Rezeptpositionen
@@ -141,8 +143,10 @@ Minimaler MVP:
 - kontrollierter Storage
 - Excel-Import fuer 1-2 reale Templates
 - Review-Maske
+- Versuchsdatenbank
 - Rezeptdatenbank
 - Suche nach Rohstoff, Rezept, Produktgruppe
+- Suche nach Kunde, Versuchsnummer, Mischertyp und Maschine
 - Quellenverweis auf Excel-Zelle oder PDF-Seite
 
 Noch nicht im MVP:

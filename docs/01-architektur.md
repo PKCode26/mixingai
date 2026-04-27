@@ -2,9 +2,9 @@
 
 ## Produktdefinition
 
-MixingAI ist ein geprueftes Rezept- und Dokumentensystem mit KI-Assistenz.
+MixingAI ist ein geprueftes Versuchs-, Rezept- und Dokumentensystem mit KI-Assistenz.
 
-Die Anwendung soll viele PDF- und Excel-Dateien mit Mischungs-/Rezepturdaten kontrolliert uebernehmen, strukturieren, pruefen und anschliessend durchsuchbar machen. Der Chatbot ist eine Komfortschicht, nicht das Basissystem.
+Die Anwendung soll viele PDF- und Excel-Dateien mit Versuchs-, Mischungs- und Rezepturdaten kontrolliert uebernehmen, strukturieren, pruefen und anschliessend durchsuchbar machen. Der Chatbot ist eine Komfortschicht, nicht das Basissystem.
 
 ## Systemgrenzen
 
@@ -13,7 +13,9 @@ Die Anwendung soll viele PDF- und Excel-Dateien mit Mischungs-/Rezepturdaten kon
 Nach der Migration ist MixingAI das fuehrende System fuer:
 
 - Rezeptdokumente
+- Versuchsprotokolle
 - Dokumentversionen
+- Versuchsdaten
 - extrahierte Rezeptdaten
 - Rohstoffe und Synonyme
 - Quellenverweise
@@ -100,12 +102,16 @@ Beispiele fuer Quellenverweise:
 - PDF: Datei, Version, Seite, Tabellenzeile, Bounding Box
 - OCR: Seite, Textblock, Wortposition, Confidence
 
-### 4. Rezeptdatenbank
+### 4. Versuchs- und Rezeptdatenbank
 
-Die Rezeptdatenbank ist das fachliche Ziel des Imports.
+Die Versuchs- und Rezeptdatenbank ist das fachliche Ziel des Imports.
+
+Versuchsprotokolle sind als flexible fachliche Quelle zu behandeln. Eine Beispielstruktur kann Felder wie Versuchsnummer, Kunde, Produkt, Aufgabenstellung, Testapparat, Mischertyp, Baugroesse, Fabrikatnummer, Sonderausstattung, Befuellung und Gesamtmenge enthalten. Diese Struktur ist ein Referenzpunkt, aber kein starres Schema fuer alle Altdokumente.
 
 Kernobjekte:
 
+- Versuch / Trial
+- Versuchsdokument
 - Rezept
 - Rezeptversion
 - Rezeptposition
@@ -119,6 +125,8 @@ Kernobjekte:
 Beispiele fuer Abfragen:
 
 - alle Rezepte mit Rohstoff X
+- alle Versuche eines Kunden
+- alle Versuche mit bestimmtem Mischertyp oder bestimmter Baugroesse
 - alle Rezepturen mit Rohstoff X ueber 8 Prozent
 - Rezept A und Rezept B vergleichen
 - Rezeptversionen vergleichen
@@ -191,7 +199,7 @@ Datei
   -> import_runs
   -> extraction_staging
   -> Review
-  -> recipes / recipe_versions / recipe_lines
+  -> trials / recipes / recipe_versions / recipe_lines
   -> Suche / Vergleich / KI
 ```
 

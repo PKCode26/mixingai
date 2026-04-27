@@ -48,6 +48,7 @@ Kernmasken:
 - Dokumentenarchiv
 - Upload / Import
 - Review und Korrektur
+- Versuchssuche
 - Rezeptsuche
 - Rezeptvergleich
 - Rohstoffverwaltung
@@ -56,7 +57,7 @@ Kernmasken:
 
 Warum nicht zuerst Chat:
 
-Die Anwendung muss auch ohne KI nutzbar sein. Suche, Filter, Vergleich und Review sind normale Produktfunktionen.
+Die Anwendung muss auch ohne KI nutzbar sein. Suche, Filter, Vergleich und Review sind normale Produktfunktionen. Fuer Kunden, die keine Daten in externe KI-Systeme geben wollen, bleibt KI standardmaessig deaktiviert und kann spaeter nur ueber freigegebene On-Prem- oder private Provider angebunden werden.
 
 ## Datenbank
 
@@ -74,7 +75,7 @@ Startschemas:
 app_core      -- User, Rollen, Rechte, Audit
 app_dms       -- Dokumente, Versionen, Dateien, OCR-Text
 app_import    -- Importlaeufe, Staging, Validierungen
-app_recipe    -- Rezepte, Rohstoffe, Rezeptpositionen, Eigenschaften
+app_recipe    -- Versuche, Rezepte, Rohstoffe, Rezeptpositionen, Eigenschaften
 app_ai        -- KI-Konfiguration, Chatverlauf optional, Tool-Logs
 ```
 
@@ -110,6 +111,8 @@ Moegliche Provider:
 - Azure AI Document Intelligence fuer Layout, Tabellen und OCR
 - lokale OCR-Komponenten bei Offline-Anforderung
 - spezialisierte Parser fuer wiederkehrende Excel-Templates
+
+Cloud-OCR ist eine Provider-Option, aber keine Grundvoraussetzung. Bei On-Prem-Anforderung bleibt der Provider deaktiviert oder wird durch lokale Komponenten ersetzt.
 
 Wichtig:
 
