@@ -10,6 +10,7 @@ Ziele:
 - erpforai-Uebernahme schneiden
 - Deployment-Zielsetup fuer amixon-VM dokumentieren
 - UI-/Shared-Shell-Leitplanken dokumentieren
+- Datenmodell-Inputfaktoren dokumentieren
 
 Ergebnis:
 
