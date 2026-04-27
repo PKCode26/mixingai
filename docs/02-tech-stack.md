@@ -144,15 +144,23 @@ Festgelegt:
 
 - Windows lokal fuer Entwicklung
 - Linux-VM bei amixon fuer Pilotbetrieb
-- PostgreSQL separat oder auf derselben Pilotmaschine
+- PostgreSQL lokal auf derselben VM
 - App-Storage auf lokaler Platte/Volume
+- Docker Compose fuer den MVP
+- Ollama lokal auf derselben VM
 - Backup fuer DB und Storage gemeinsam planen
+
+Vorhandene Zielhardware:
+
+- AMD Ryzen Threadripper 7960X
+- 128 GB DDR5-5600
+- 2 x 2 TB M.2 NVMe RAID1
+- NVIDIA RTX PRO 6000
 
 Noch zu entscheiden:
 
-- Docker/Compose ja/nein
-- Ollama auf derselben VM oder separater interner GPU-Maschine
-- verfuegbare GPU/VRAM fuer lokale KI
+- genaue Linux-Distribution und Version
+- Ollama-Modelle fuer Chat und Embeddings
 
 ## Tests
 

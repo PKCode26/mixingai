@@ -37,6 +37,7 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 - [Umgebungsvariablen](docs/05-umgebungsvariablen.md)
 - [Grundsatzentscheidungen](docs/06-grundsatzentscheidungen.md)
 - [On-Prem-KI und Testdaten](docs/07-on-prem-ki-und-testdaten.md)
+- [Deployment-Zielsetup](docs/08-deployment-zielsetup.md)
 
 ## Grundsatz
 

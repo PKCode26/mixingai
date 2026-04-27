@@ -196,8 +196,9 @@ Festgelegt:
 
 - Linux-VM bei amixon
 - PostgreSQL und App-Storage werden dort betrieben
-- KI/OCR-Komponenten muessen ebenfalls dort oder in derselben on-prem Umgebung laufen
-- Docker/Compose ist naheliegend, aber noch nicht final entschieden
+- KI/OCR-Komponenten laufen ebenfalls dort oder in derselben on-prem Umgebung
+- Docker Compose wird fuer den MVP verwendet
+- Zielhardware: AMD Ryzen Threadripper 7960X, 128 GB RAM, 2 x 2 TB NVMe RAID1, NVIDIA RTX PRO 6000
 
 ### 4. Cloud-Verbot genau definieren
 
@@ -210,8 +211,8 @@ Festgelegt fuer den Start:
 
 Noch offen:
 
-- ob die Linux-VM GPU hat
-- ob KI auf derselben VM oder auf separater interner GPU-Maschine laeuft
+- genaue Linux-Distribution und Version
+- NVIDIA-Treiber / Container Runtime
 - welches konkrete Ollama-Chatmodell und Embeddingmodell verwendet werden
 
 ### 5. Dokument- und Versionierungsregeln

@@ -8,6 +8,7 @@ Ziele:
 - Architektur dokumentieren
 - Tech-Stack festlegen
 - erpforai-Uebernahme schneiden
+- Deployment-Zielsetup fuer amixon-VM dokumentieren
 
 Ergebnis:
 

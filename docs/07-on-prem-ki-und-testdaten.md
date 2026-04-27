@@ -52,6 +52,16 @@ Risiko:
 - Modellqualitaet haengt vom gewaehlten lokalen Modell ab
 - fuer produktiven Mehrbenutzerbetrieb muss Last und Antwortzeit getestet werden
 
+Zielhardware:
+
+```text
+AMD Ryzen Threadripper 7960X
+128 GB RAM
+NVIDIA RTX PRO 6000
+```
+
+Damit ist Ollama fuer den MVP auf derselben VM realistisch. Die konkrete Modellwahl muss trotzdem mit echten Such- und Antwortaufgaben getestet werden.
+
 Konfiguration:
 
 ```text
@@ -151,9 +161,7 @@ Pflichtfunktionen:
 
 Vor Implementierung klaeren:
 
-- Hat die amixon-Linux-VM eine GPU?
-- Falls nein: reicht CPU-LLM fuer die erwartete Nutzung?
-- Soll Ollama auf derselben VM oder separatem internen GPU-Host laufen?
+- genaue GPU-Treiber-/Container-Runtime-Konfiguration
 - Welches Ollama-Chatmodell und welches Embeddingmodell werden freigegeben?
 - Welche OCR-Qualitaet liefern Tesseract, PaddleOCR und Docling auf echten Beispiel-PDFs?
 - Welche Antwortzeit ist fuer die Suche akzeptabel?
