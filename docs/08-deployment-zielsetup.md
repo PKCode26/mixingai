@@ -106,6 +106,7 @@ TLS-Zertifikat:
 - alternativ ein intern verwaltetes Zertifikat fuer den Hostnamen
 - Zertifikatsablage nicht im Git
 - Zertifikatserneuerung im Betriebskonzept festhalten
+- Einrichtung kann am Ende des MVP-Scaffolds erfolgen, die Architektur bleibt trotzdem HTTPS-first
 
 Nginx sollte mindestens setzen:
 
@@ -177,11 +178,21 @@ Wichtig:
 
 Ein DB-Backup ohne Dokument-Storage ist wertlos. Ein Dokument-Storage ohne DB ist ebenfalls nicht ausreichend.
 
+Festlegung:
+
+- Backup taeglich
+- DB und Datei-Storage gemeinsam sichern
+- Retention nach ueblichem Schema:
+  - taegliche Backups fuer kurzfristige Wiederherstellung
+  - wöchentliche Backups fuer mittlere Frist
+  - monatliche Backups fuer laengere Aufbewahrung
+- genaue Aufbewahrungsdauer mit amixon final abstimmen
+
 ## Noch vor Installation klaeren
 
 - genaue Linux-Distribution und Version
 - Zugriff auf NVIDIA-Treiber und Container Runtime
-- gewuenschte Domain / interner Hostname
+- interner Hostname: `mixingai.amixon.local`
 - TLS-Zertifikat aus interner CA oder anderer amixon-Quelle
 - Backup-Ziel
 - Wartungsfenster fuer Updates

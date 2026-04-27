@@ -161,7 +161,7 @@ Vorhandene Zielhardware:
 
 Noch zu entscheiden:
 
-- Ollama-Modelle fuer Chat und Embeddings
+- konkretes Ollama-Chatmodell und Embeddingmodell; Start mit dem neuesten passenden stabilen Modell, final nach Test auf echter Zielhardware
 
 ## Tests
 

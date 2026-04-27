@@ -71,6 +71,12 @@ Ollama__ChatModel=...
 Ollama__EmbeddingModel=...
 ```
 
+Modellwahl:
+
+- Start mit dem neuesten passenden stabilen Ollama-Modell fuer Chat
+- separates lokales Embeddingmodell fuer semantische Suche
+- finale Auswahl nach Test auf der amixon-Zielhardware und mit echten Suchaufgaben
+
 ### Spaetere Alternative
 
 vLLM bleibt nur eine spaetere Alternative, falls Ollama fuer Last, Antwortzeit oder Modellbetrieb nicht reicht.
@@ -162,6 +168,6 @@ Pflichtfunktionen:
 Vor Implementierung klaeren:
 
 - genaue GPU-Treiber-/Container-Runtime-Konfiguration
-- Welches Ollama-Chatmodell und welches Embeddingmodell werden freigegeben?
+- welches konkrete Ollama-Chatmodell und Embeddingmodell nach Test freigegeben wird
 - Welche OCR-Qualitaet liefern Tesseract, PaddleOCR und Docling auf echten Beispiel-PDFs?
 - Welche Antwortzeit ist fuer die Suche akzeptabel?

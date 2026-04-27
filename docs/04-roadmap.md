@@ -9,6 +9,7 @@ Ziele:
 - Tech-Stack festlegen
 - erpforai-Uebernahme schneiden
 - Deployment-Zielsetup fuer amixon-VM dokumentieren
+- UI-/Shared-Shell-Leitplanken dokumentieren
 
 Ergebnis:
 
@@ -24,11 +25,13 @@ Ziele:
 - User und Sessions
 - Login/Logout/Me
 - einfache Admin-Seeds
+- Shared Shell und minimale Designbasis
 
 Ergebnis:
 
 - geschuetzte Anwendung
 - einfache Anmeldung ohne komplexe Rechtekontrolle
+- konsistente Basis-UI ohne Sidebar
 
 ## Phase 2: DMS / Document Vault
 

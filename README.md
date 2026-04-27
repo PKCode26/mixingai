@@ -38,6 +38,7 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 - [Grundsatzentscheidungen](docs/06-grundsatzentscheidungen.md)
 - [On-Prem-KI und Testdaten](docs/07-on-prem-ki-und-testdaten.md)
 - [Deployment-Zielsetup](docs/08-deployment-zielsetup.md)
+- [UI- und Produktleitplanken](docs/09-ui-und-produktleitplanken.md)
 
 ## Grundsatz
 

@@ -214,7 +214,8 @@ Noch offen:
 
 - NVIDIA-Treiber / Container Runtime
 - interner Hostname und TLS-Zertifikat aus amixon-Umgebung
-- welches konkrete Ollama-Chatmodell und Embeddingmodell verwendet werden
+- TLS-Zertifikat wird am Ende eingerichtet
+- konkretes Ollama-Chatmodell und Embeddingmodell: neuestes passendes stabiles Modell, final nach Test auf Zielhardware
 
 ### 5. Dokument- und Versionierungsregeln
 
@@ -318,13 +319,18 @@ Vorgehen:
 
 DB und Storage muessen gemeinsam gesichert werden.
 
-Zu klaeren:
+Festgelegt:
 
-- Backup-Intervall
+- Backup taeglich
+- DB und Storage gemeinsam sichern
+- uebliches Retention-Schema mit taeglichen, woechentlichen und monatlichen Backups
+
+Noch zu klaeren:
+
+- genaues Backup-Ziel
+- genaue Aufbewahrungsdauer
 - Restore-Test
-- Aufbewahrungszeit
 - wer betreibt Backups?
-- wie werden Datei-Storage und DB konsistent gesichert?
 
 ### 11. Audit-Tiefe
 
