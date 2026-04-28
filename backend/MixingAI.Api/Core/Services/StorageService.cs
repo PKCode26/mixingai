@@ -38,6 +38,15 @@ public sealed class StorageService
 
     public string GetFullPath(string relativePath) => Path.Combine(_root, relativePath);
 
+    public async Task<string> SaveBytesAsync(byte[] data, string relativeDir, string fileName, CancellationToken ct = default)
+    {
+        var dir = Path.Combine(_root, relativeDir);
+        Directory.CreateDirectory(dir);
+        var relative = Path.Combine(relativeDir, fileName);
+        await File.WriteAllBytesAsync(Path.Combine(_root, relative), data, ct);
+        return relative;
+    }
+
     public void Delete(string relativePath)
     {
         var full = Path.Combine(_root, relativePath);

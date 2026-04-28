@@ -15,25 +15,25 @@ public sealed class PdfExtractor : IDocumentExtractor
             using var pdf = PdfDocument.Open(storagePath);
             var issues = new List<string>();
             var fields = new List<StagedFieldData>();
+            var images = new List<ExtractedImageData>();
             var fullTextBuilder = new System.Text.StringBuilder();
 
-            // Felder aus Dateiname extrahieren (höchste Zuverlässigkeit)
-            var filenameFields = FieldPatternMatcher.ParseFilename(Path.GetFileName(storagePath));
-            fields.AddRange(filenameFields);
+            fields.AddRange(FieldPatternMatcher.ParseFilename(Path.GetFileName(storagePath)));
 
             int pageCount = pdf.NumberOfPages;
 
-            // Pro Seite Text extrahieren (1 Seite = 1 Versuch laut Protokollstruktur)
             for (int pageNum = 1; pageNum <= pageCount; pageNum++)
             {
                 var page = pdf.GetPage(pageNum);
+
                 var pageText = ExtractPageText(page);
                 fullTextBuilder.AppendLine($"=== Seite {pageNum} ===");
                 fullTextBuilder.AppendLine(pageText);
 
                 var sourceRef = pageCount > 1 ? $"Seite:{pageNum}" : "Seite:1";
-                var pageFields = FieldPatternMatcher.Match(pageText, sourceRef);
-                fields.AddRange(pageFields);
+                fields.AddRange(FieldPatternMatcher.Match(pageText, sourceRef));
+
+                ExtractPageImages(page, pageNum, images);
             }
 
             var rawText = fullTextBuilder.ToString();
@@ -41,17 +41,15 @@ public sealed class PdfExtractor : IDocumentExtractor
             if (string.IsNullOrWhiteSpace(rawText.Replace("=== Seite", "").Trim()))
             {
                 issues.Add("Kein Text extrahierbar — möglicherweise gescanntes PDF. OCR-Verarbeitung empfohlen.");
-                // Rohtexteintrag damit der Reviewer sieht was ankam
                 fields.Add(new StagedFieldData(
                     "OCR_Hinweis",
-                    "Kein Textlayer gefunden. Bitte manuell prüfen oder OCR aktivieren.",
+                    "Kein Textlayer gefunden. Bitte OCR-Knopf verwenden oder manuell prüfen.",
                     null, "System"));
             }
 
             if (fields.Count == 0)
                 issues.Add("Keine bekannten Felder erkannt. Bitte manuell im Review prüfen.");
 
-            // Seitenanzahl als Metafeld
             fields.Add(new StagedFieldData("PDF_Seitenanzahl", pageCount.ToString(), 1.0f, "System"));
 
             return Task.FromResult(new ExtractionResult(
@@ -59,7 +57,8 @@ public sealed class PdfExtractor : IDocumentExtractor
                 ErrorMessage: null,
                 RawText: rawText,
                 Fields: fields,
-                Issues: issues));
+                Issues: issues,
+                Images: images));
         }
         catch (Exception ex)
         {
@@ -68,13 +67,13 @@ public sealed class PdfExtractor : IDocumentExtractor
                 ErrorMessage: $"PDF-Extraktion fehlgeschlagen: {ex.Message}",
                 RawText: string.Empty,
                 Fields: [],
-                Issues: []));
+                Issues: [],
+                Images: []));
         }
     }
 
     private static string ExtractPageText(Page page)
     {
-        // Wörter nach Y-Position (Zeile) und X-Position gruppieren
         var words = page.GetWords().ToList();
         if (words.Count == 0) return string.Empty;
 
@@ -84,5 +83,46 @@ public sealed class PdfExtractor : IDocumentExtractor
             .Select(g => string.Join(" ", g.OrderBy(w => w.BoundingBox.Left).Select(w => w.Text)));
 
         return string.Join("\n", lineGroups);
+    }
+
+    private static void ExtractPageImages(Page page, int pageNum, List<ExtractedImageData> results)
+    {
+        int idx = 0;
+        foreach (var img in page.GetImages())
+        {
+            try
+            {
+                var raw = img.RawBytes.ToArray();
+                if (raw.Length < 500) continue; // skip tiny/marker images
+
+                var mime = DetectMime(raw);
+                if (mime is null) continue; // skip unknown formats
+
+                results.Add(new ExtractedImageData(pageNum, idx++, raw, mime));
+            }
+            catch
+            {
+                // skip images that can't be read
+            }
+        }
+    }
+
+    private static string? DetectMime(byte[] data)
+    {
+        if (data.Length < 4) return null;
+
+        // JPEG: FF D8 FF
+        if (data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF)
+            return "image/jpeg";
+
+        // PNG: 89 50 4E 47
+        if (data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47)
+            return "image/png";
+
+        // GIF: 47 49 46
+        if (data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46)
+            return "image/gif";
+
+        return null;
     }
 }

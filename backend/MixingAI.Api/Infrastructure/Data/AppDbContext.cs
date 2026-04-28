@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ImportRun> ImportRuns => Set<ImportRun>();
     public DbSet<StagedField> StagedFields => Set<StagedField>();
     public DbSet<ValidationIssue> ValidationIssues => Set<ValidationIssue>();
+    public DbSet<ExtractedImage> ExtractedImages => Set<ExtractedImage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Versuchsprotokoll – Muster</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    color: #000;
+    background: #fff;
+    padding: 1.5cm 2cm;
+  }
+
+  /* Header */
+  .logo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .logo {
+    font-size: 18pt;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #1a3a6a;
+  }
+  .logo small { font-size: 8pt; font-weight: normal; display: block; color: #555; }
+  .doc-info { text-align: right; font-size: 8pt; color: #555; line-height: 1.5; }
+
+  h1 {
+    font-size: 13pt;
+    text-align: center;
+    border-top: 2px solid #1a3a6a;
+    border-bottom: 2px solid #1a3a6a;
+    padding: 4px 0;
+    margin: 8px 0;
+    letter-spacing: 1px;
+    color: #1a3a6a;
+  }
+
+  /* Sections */
+  .section {
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-weight: bold;
+    font-size: 9pt;
+    background: #d9e2f3;
+    padding: 2px 6px;
+    border-left: 3px solid #1a3a6a;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Field table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+  }
+  td {
+    padding: 3px 6px;
+    vertical-align: top;
+  }
+  td.label {
+    width: 38%;
+    font-weight: bold;
+    background: #f0f4fb;
+    border: 1px solid #cdd5e0;
+    color: #1a3a6a;
+  }
+  td.value {
+    border: 1px solid #cdd5e0;
+    background: #fff;
+    min-height: 18px;
+  }
+  td.value-wide {
+    border: 1px solid #cdd5e0;
+    background: #fff;
+    height: 38px;
+    vertical-align: top;
+  }
+
+  /* Process params */
+  .params-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  .param-box {
+    border: 1px solid #cdd5e0;
+    padding: 4px 6px;
+    background: #fff;
+  }
+  .param-box .param-label {
+    font-size: 7.5pt;
+    color: #555;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .param-box .param-value {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #1a3a6a;
+  }
+  .param-box .param-unit {
+    font-size: 7.5pt;
+    color: #555;
+  }
+
+  /* Results table */
+  .results-table th {
+    background: #d9e2f3;
+    border: 1px solid #cdd5e0;
+    padding: 3px 6px;
+    font-size: 8.5pt;
+    text-align: left;
+  }
+  .results-table td {
+    border: 1px solid #cdd5e0;
+  }
+  .results-table tr:nth-child(even) td { background: #f8f9fb; }
+
+  /* Signature */
+  .signature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 10px;
+  }
+  .sig-box {
+    border-top: 1px solid #000;
+    padding-top: 3px;
+    font-size: 8pt;
+    color: #555;
+  }
+
+  /* Print */
+  @media print {
+    body { padding: 0; }
+    @page { size: A4; margin: 1.5cm 2cm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="logo-row">
+  <div class="logo">
+    amixon<small>GmbH</small>
+  </div>
+  <div class="doc-info">
+    Versuchsprotokoll<br>
+    Dok.-Nr.: VP-2024-0042<br>
+    Revision: 1<br>
+    Seite: 1 von 1
+  </div>
+</div>
+
+<h1>Versuchsprotokoll</h1>
+
+<!-- Abschnitt 1: Allgemeine Angaben -->
+<div class="section">
+  <div class="section-title">1. Allgemeine Angaben</div>
+  <table>
+    <tr>
+      <td class="label">Datum</td>
+      <td class="value">28.04.2024</td>
+      <td class="label">Versuchsnummer</td>
+      <td class="value">VP-2024-0042</td>
+    </tr>
+    <tr>
+      <td class="label">Kunde</td>
+      <td class="value" colspan="3">Musterfirma GmbH &amp; Co. KG, Musterstadt</td>
+    </tr>
+    <tr>
+      <td class="label">Versuchsteilnehmer Kundenseits</td>
+      <td class="value" colspan="3">Dr. Max Mustermann, Leiterin Verfahrenstechnik</td>
+    </tr>
+    <tr>
+      <td class="label">Versuchsteilnehmer amixon</td>
+      <td class="value" colspan="3">Dipl.-Ing. Anna Schmidt, Anwendungstechnik</td>
+    </tr>
+    <tr>
+      <td class="label">Aufgabenstellung</td>
+      <td class="value-wide" colspan="3">Homogenisierung eines ternären Pulvergemisches (Zement, Kalkstein, Flugasche) zur Qualifikation des AMK 5 für die Serienproduktion. Ziel: RSD &lt; 2 % nach 8 Minuten Mischzeit.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Abschnitt 2: Versuchsapparat -->
+<div class="section">
+  <div class="section-title">2. Versuchsapparat</div>
+  <table>
+    <tr>
+      <td class="label">Testapparat</td>
+      <td class="value">AMK 5 (Kegelschneckenmischer)</td>
+      <td class="label">Fabrikatnummer</td>
+      <td class="value">12345</td>
+    </tr>
+    <tr>
+      <td class="label">Versuchsaggregat</td>
+      <td class="value">AMK 5</td>
+      <td class="label">Baugröße</td>
+      <td class="value">5 L</td>
+    </tr>
+    <tr>
+      <td class="label">Sonderausstattung</td>
+      <td class="value" colspan="3">Temperiermantel, Vakuumanschluss, Probenahmeventil DN25</td>
+    </tr>
+    <tr>
+      <td class="label">Befüllen mit</td>
+      <td class="value" colspan="3">Zement CEM I 42,5 N + Kalkstein (d50 = 12 µm) + Flugasche Klasse F</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Abschnitt 3: Prozessparameter -->
+<div class="section">
+  <div class="section-title">3. Prozessparameter</div>
+  <div class="params-grid">
+    <div class="param-box">
+      <span class="param-label">Gesamtmenge</span>
+      <span class="param-value">3,2 <span class="param-unit">kg</span></span>
+    </div>
+    <div class="param-box">
+      <span class="param-label">Füllgrad</span>
+      <span class="param-value">64 <span class="param-unit">%</span></span>
+    </div>
+    <div class="param-box">
+      <span class="param-label">Mischzeit</span>
+      <span class="param-value">8 <span class="param-unit">min</span></span>
+    </div>
+    <div class="param-box">
+      <span class="param-label">Drehzahl</span>
+      <span class="param-value">120 <span class="param-unit">rpm</span></span>
+    </div>
+    <div class="param-box">
+      <span class="param-label">Temperatur</span>
+      <span class="param-value">22 <span class="param-unit">°C</span></span>
+    </div>
+    <div class="param-box">
+      <span class="param-label">Chargengewicht</span>
+      <span class="param-value">3,2 <span class="param-unit">kg</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- Abschnitt 4: Zusammensetzung -->
+<div class="section">
+  <div class="section-title">4. Zusammensetzung / Rezeptur</div>
+  <table class="results-table">
+    <tr>
+      <th>Komponente</th>
+      <th>Anteil [%]</th>
+      <th>Masse [kg]</th>
+      <th>Schüttdichte [g/L]</th>
+      <th>d50 [µm]</th>
+    </tr>
+    <tr>
+      <td class="value">Zement CEM I 42,5 N</td>
+      <td class="value">60</td>
+      <td class="value">1,92</td>
+      <td class="value">1050</td>
+      <td class="value">18</td>
+    </tr>
+    <tr>
+      <td class="value">Kalkstein</td>
+      <td class="value">25</td>
+      <td class="value">0,80</td>
+      <td class="value">820</td>
+      <td class="value">12</td>
+    </tr>
+    <tr>
+      <td class="value">Flugasche Klasse F</td>
+      <td class="value">15</td>
+      <td class="value">0,48</td>
+      <td class="value">950</td>
+      <td class="value">25</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Abschnitt 5: Ergebnisse -->
+<div class="section">
+  <div class="section-title">5. Mischergebnis und Qualitätsbewertung</div>
+  <table>
+    <tr>
+      <td class="label">Ziel des Versuchs</td>
+      <td class="value-wide" colspan="3">Nachweis Homogenität RSD &lt; 2 % für Serienzulassung</td>
+    </tr>
+    <tr>
+      <td class="label">Erreichter RSD</td>
+      <td class="value">1,4 %</td>
+      <td class="label">Bewertung</td>
+      <td class="value" style="color:darkgreen;font-weight:bold">✓ Ziel erreicht</td>
+    </tr>
+    <tr>
+      <td class="label">Besonderheiten</td>
+      <td class="value-wide" colspan="3">Leichte Anbackungen am Schneckenschaft nach 4 Minuten – ohne Einfluss auf Endergebnis. Probenahme an 5 Positionen (oben/mitte/unten + 2 Seiten).</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Unterschriften -->
+<div class="signature-row">
+  <div class="sig-box">Erstellt: Anna Schmidt, 28.04.2024</div>
+  <div class="sig-box">Geprüft: Dr. Max Mustermann, 28.04.2024</div>
+</div>
+
+</body>
+</html>

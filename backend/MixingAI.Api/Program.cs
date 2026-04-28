@@ -1,6 +1,7 @@
 using MixingAI.Api.Core.Endpoints;
 using MixingAI.Api.Core.Import;
 using MixingAI.Api.Core.Import.Extraction;
+using MixingAI.Api.Core.Ocr;
 using MixingAI.Api.Core.Security;
 using MixingAI.Api.Core.Services;
 using MixingAI.Api.Infrastructure.Data;
@@ -47,6 +48,7 @@ builder.Services.AddSingleton<StorageService>();
 builder.Services.AddSingleton<IDocumentExtractor, PdfExtractor>();
 builder.Services.AddSingleton<IDocumentExtractor, ExcelExtractor>();
 builder.Services.AddHostedService<ImportProcessor>();
+builder.Services.AddSingleton<IOcrProvider, DisabledOcrProvider>();
 
 builder.Services.AddAntiforgery();
 builder.Services.AddAuthorization();

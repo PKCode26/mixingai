@@ -37,3 +37,16 @@ export interface ValidationIssue {
   fieldKey: string | null
   message: string
 }
+
+export interface ExtractedImage {
+  id: string
+  pageNumber: number
+  imageIndex: number
+  mimeType: string
+  fileSizeBytes: number
+}
+
+export interface OcrStatus {
+  isAvailable: boolean
+  message: string | null
+}

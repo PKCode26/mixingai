@@ -33,3 +33,12 @@ public record CreateImportRunRequest(Guid DocumentId);
 public record ConfirmFieldRequest(bool IsConfirmed, string? FieldValue);
 
 public record ReviewDecisionRequest(string? Notes);
+
+public record ExtractedImageResponse(
+    Guid Id,
+    int PageNumber,
+    int ImageIndex,
+    string MimeType,
+    long FileSizeBytes);
+
+public record OcrStatusResponse(bool IsAvailable, string? Message);

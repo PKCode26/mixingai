@@ -113,6 +113,16 @@
   background: #fecaca;
 }
 
+.btnReview {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.btnReview:hover {
+  background: #dbeafe;
+}
+
 .errorMsg {
   font-size: 0.78rem;
   color: #991b1b;

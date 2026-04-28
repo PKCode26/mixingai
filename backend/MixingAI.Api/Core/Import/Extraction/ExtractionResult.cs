@@ -6,9 +6,16 @@ public record StagedFieldData(
     float? Confidence,
     string? SourceRef);
 
+public record ExtractedImageData(
+    int PageNumber,
+    int Index,
+    byte[] Data,
+    string MimeType);
+
 public record ExtractionResult(
     bool Success,
     string? ErrorMessage,
     string RawText,
     IReadOnlyList<StagedFieldData> Fields,
-    IReadOnlyList<string> Issues);
+    IReadOnlyList<string> Issues,
+    IReadOnlyList<ExtractedImageData> Images);

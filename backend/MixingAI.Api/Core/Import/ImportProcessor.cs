@@ -65,7 +65,8 @@ public sealed class ImportProcessor(
                 ErrorMessage: $"Kein Extraktor für MIME-Typ '{run.Document.MimeContentType}' verfügbar.",
                 RawText: string.Empty,
                 Fields: [],
-                Issues: []);
+                Issues: [],
+                Images: []);
         }
         else
         {
@@ -80,8 +81,8 @@ public sealed class ImportProcessor(
             return;
         }
 
-        // Staged Fields persistieren
         var now = DateTime.UtcNow;
+
         foreach (var field in result.Fields)
         {
             db.StagedFields.Add(new StagedField
@@ -94,7 +95,6 @@ public sealed class ImportProcessor(
             });
         }
 
-        // Validation Issues persistieren
         foreach (var issue in result.Issues)
         {
             db.ValidationIssues.Add(new ValidationIssue
@@ -105,7 +105,6 @@ public sealed class ImportProcessor(
             });
         }
 
-        // Rohtexte als Sonderfeld (für spätere Suche/Review)
         if (!string.IsNullOrWhiteSpace(result.RawText))
         {
             db.StagedFields.Add(new StagedField
@@ -118,9 +117,37 @@ public sealed class ImportProcessor(
             });
         }
 
+        // Extrahierte Bilder speichern
+        var imageDir = Path.Combine("imports", run.Id.ToString(), "images");
+        foreach (var img in result.Images)
+        {
+            try
+            {
+                var ext = img.MimeType == "image/png" ? ".png"
+                        : img.MimeType == "image/gif" ? ".gif"
+                        : ".jpg";
+                var fileName = $"p{img.PageNumber:D3}_{img.Index:D2}{ext}";
+                var relativePath = await storage.SaveBytesAsync(img.Data, imageDir, fileName, ct);
+
+                db.ExtractedImages.Add(new ExtractedImage
+                {
+                    ImportRunId   = run.Id,
+                    PageNumber    = img.PageNumber,
+                    ImageIndex    = img.Index,
+                    StoragePath   = relativePath,
+                    MimeType      = img.MimeType,
+                    FileSizeBytes = img.Data.Length,
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Bild konnte nicht gespeichert werden: Seite {Page} Index {Idx}", img.PageNumber, img.Index);
+            }
+        }
+
         run.SetNeedsReview(now);
         await db.SaveChangesAsync(ct);
-        logger.LogInformation("ImportRun {Id}: {Count} Felder extrahiert, Status NeedsReview.",
-            run.Id, result.Fields.Count);
+        logger.LogInformation("ImportRun {Id}: {Fields} Felder, {Images} Bilder extrahiert → NeedsReview.",
+            run.Id, result.Fields.Count, result.Images.Count);
     }
 }

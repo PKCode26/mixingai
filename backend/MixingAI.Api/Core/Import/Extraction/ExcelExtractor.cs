@@ -91,7 +91,8 @@ public sealed class ExcelExtractor : IDocumentExtractor
                 ErrorMessage: null,
                 RawText: fullTextBuilder.ToString(),
                 Fields: fields,
-                Issues: issues));
+                Issues: issues,
+                Images: []));
         }
         catch (Exception ex)
         {
@@ -100,7 +101,8 @@ public sealed class ExcelExtractor : IDocumentExtractor
                 ErrorMessage: $"Excel-Extraktion fehlgeschlagen: {ex.Message}",
                 RawText: string.Empty,
                 Fields: [],
-                Issues: []));
+                Issues: [],
+                Images: []));
         }
     }
 

@@ -1,6 +1,6 @@
 import type { AuthUser, LoginRequest, LoginResponse } from '../types/auth'
 import type { Document, DocumentDuplicateError } from '../types/documents'
-import type { ImportRun, StagedField, ValidationIssue } from '../types/imports'
+import type { ImportRun, StagedField, ValidationIssue, ExtractedImage, OcrStatus } from '../types/imports'
 
 const BASE = '/api'
 
@@ -105,5 +105,14 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ isConfirmed, fieldValue: fieldValue ?? null }),
       }),
+
+    images: (runId: string) => request<ExtractedImage[]>(`/imports/${runId}/images`),
+
+    imageUrl: (runId: string, imageId: string) => `/api/imports/${runId}/images/${imageId}`,
+
+    triggerOcr: (runId: string) =>
+      request<{ fieldsFound: number; pagesProcessed: number }>(`/imports/${runId}/ocr`, { method: 'POST' }),
+
+    ocrStatus: () => request<OcrStatus>('/imports/ocr/status'),
   },
 }

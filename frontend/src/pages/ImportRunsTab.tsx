@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import type { ImportRun, StagedField } from '../types/imports'
 import styles from './ImportRunsTab.module.css'
@@ -113,6 +114,7 @@ function StagedFieldsPanel({ runId }: { runId: string }) {
 function RunRow({ run }: { run: ImportRun }) {
   const [expanded, setExpanded] = useState(false)
   const qc = useQueryClient()
+  const navigate = useNavigate()
 
   const approveMutation = useMutation({
     mutationFn: () => api.imports.approve(run.id),
@@ -142,6 +144,12 @@ function RunRow({ run }: { run: ImportRun }) {
         <td>{formatDate(run.createdAtUtc)}</td>
         <td onClick={e => e.stopPropagation()}>
           <div className={styles.actions}>
+            <button
+              className={`${styles.btn} ${styles.btnReview}`}
+              onClick={() => navigate(`/imports/${run.id}/review`)}
+            >
+              Review
+            </button>
             {canReview && (
               <>
                 <button
