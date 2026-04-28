@@ -1,5 +1,6 @@
 using MixingAI.Api.Core.Endpoints;
 using MixingAI.Api.Core.Security;
+using MixingAI.Api.Core.Services;
 using MixingAI.Api.Infrastructure.Data;
 using MixingAI.Api.Infrastructure.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,8 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
+builder.Services.AddSingleton<StorageService>();
+builder.Services.AddAntiforgery();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
@@ -67,5 +70,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcN
    .AllowAnonymous();
 
 app.MapAuthEndpoints();
+app.MapDocumentEndpoints();
 
 app.Run();
