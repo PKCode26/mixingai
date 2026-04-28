@@ -1,5 +1,6 @@
 import type { AuthUser, LoginRequest, LoginResponse } from '../types/auth'
 import type { Document, DocumentDuplicateError } from '../types/documents'
+import type { ImportRun, StagedField, ValidationIssue } from '../types/imports'
 
 const BASE = '/api'
 
@@ -73,5 +74,36 @@ export const api = {
 
     unarchive: (id: string) =>
       request<Document>(`/documents/${id}/unarchive`, { method: 'POST' }),
+  },
+
+  imports: {
+    list: (status?: string, documentId?: string) => {
+      const params = new URLSearchParams()
+      if (status) params.set('status', status)
+      if (documentId) params.set('documentId', documentId)
+      const qs = params.toString()
+      return request<ImportRun[]>(`/imports${qs ? `?${qs}` : ''}`)
+    },
+
+    get: (id: string) => request<ImportRun>(`/imports/${id}`),
+
+    create: (documentId: string) =>
+      request<ImportRun>('/imports', { method: 'POST', body: JSON.stringify({ documentId }) }),
+
+    stagedFields: (id: string) => request<StagedField[]>(`/imports/${id}/staged`),
+
+    issues: (id: string) => request<ValidationIssue[]>(`/imports/${id}/issues`),
+
+    approve: (id: string) =>
+      request<ImportRun>(`/imports/${id}/approve`, { method: 'POST' }),
+
+    reject: (id: string, notes?: string) =>
+      request<ImportRun>(`/imports/${id}/reject`, { method: 'POST', body: JSON.stringify({ notes: notes ?? null }) }),
+
+    confirmField: (runId: string, fieldId: string, isConfirmed: boolean, fieldValue?: string) =>
+      request<StagedField>(`/imports/${runId}/staged/${fieldId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isConfirmed, fieldValue: fieldValue ?? null }),
+      }),
   },
 }

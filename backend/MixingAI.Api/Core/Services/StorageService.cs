@@ -36,6 +36,8 @@ public sealed class StorageService
     public FileStream OpenRead(string relativePath) =>
         File.OpenRead(Path.Combine(_root, relativePath));
 
+    public string GetFullPath(string relativePath) => Path.Combine(_root, relativePath);
+
     public void Delete(string relativePath)
     {
         var full = Path.Combine(_root, relativePath);

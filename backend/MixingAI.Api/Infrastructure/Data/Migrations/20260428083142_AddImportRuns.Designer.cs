@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MixingAI.Api.Infrastructure.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MixingAI.Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428083142_AddImportRuns")]
+    partial class AddImportRuns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,117 +127,6 @@ namespace MixingAI.Api.Infrastructure.Data.Migrations
                     b.ToTable("documents", "app_core");
                 });
 
-            modelBuilder.Entity("MixingAI.Api.Core.Import.ImportRun", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DocumentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<DateTime?>("ExtractedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("OperatorNotes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocumentId")
-                        .HasDatabaseName("IX_import_runs_DocumentId");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("IX_import_runs_Status");
-
-                    b.ToTable("import_runs", "app_core");
-                });
-
-            modelBuilder.Entity("MixingAI.Api.Core.Import.StagedField", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<float?>("Confidence")
-                        .HasColumnType("real");
-
-                    b.Property<string>("FieldKey")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("FieldValue")
-                        .HasMaxLength(10000)
-                        .HasColumnType("character varying(10000)");
-
-                    b.Property<Guid>("ImportRunId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SourceRef")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImportRunId", "FieldKey")
-                        .HasDatabaseName("IX_staged_fields_RunId_Key");
-
-                    b.ToTable("staged_fields", "app_core");
-                });
-
-            modelBuilder.Entity("MixingAI.Api.Core.Import.ValidationIssue", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FieldKey")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<Guid>("ImportRunId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<int>("Severity")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImportRunId")
-                        .HasDatabaseName("IX_validation_issues_RunId");
-
-                    b.ToTable("validation_issues", "app_core");
-                });
-
             modelBuilder.Entity("MixingAI.Api.Core.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -299,44 +191,6 @@ namespace MixingAI.Api.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("users", "app_core");
-                });
-            modelBuilder.Entity("MixingAI.Api.Core.Import.ImportRun", b =>
-                {
-                    b.HasOne("MixingAI.Api.Core.Documents.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Document");
-                });
-
-            modelBuilder.Entity("MixingAI.Api.Core.Import.StagedField", b =>
-                {
-                    b.HasOne("MixingAI.Api.Core.Import.ImportRun", "ImportRun")
-                        .WithMany("StagedFields")
-                        .HasForeignKey("ImportRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ImportRun");
-                });
-
-            modelBuilder.Entity("MixingAI.Api.Core.Import.ValidationIssue", b =>
-                {
-                    b.HasOne("MixingAI.Api.Core.Import.ImportRun", "ImportRun")
-                        .WithMany("ValidationIssues")
-                        .HasForeignKey("ImportRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ImportRun");
-                });
-
-            modelBuilder.Entity("MixingAI.Api.Core.Import.ImportRun", b =>
-                {
-                    b.Navigation("StagedFields");
-                    b.Navigation("ValidationIssues");
                 });
 #pragma warning restore 612, 618
         }

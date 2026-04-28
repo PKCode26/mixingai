@@ -208,3 +208,58 @@
 .uploadBtn:hover {
   background: #1d4ed8;
 }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  padding: 0.6rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.tab:hover {
+  color: #1a1a1a;
+}
+
+.tabActive {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.tabContent {
+  /* container for tab panels */
+}
+
+.subHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.btnImport {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.btnImport:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.importMsg {
+  font-size: 0.8rem;
+  color: #065f46;
+  padding: 0.25rem 0;
+}

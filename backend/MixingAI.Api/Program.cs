@@ -1,4 +1,6 @@
 using MixingAI.Api.Core.Endpoints;
+using MixingAI.Api.Core.Import;
+using MixingAI.Api.Core.Import.Extraction;
 using MixingAI.Api.Core.Security;
 using MixingAI.Api.Core.Services;
 using MixingAI.Api.Infrastructure.Data;
@@ -41,6 +43,11 @@ builder.Services.AddRateLimiter(options =>
 });
 
 builder.Services.AddSingleton<StorageService>();
+
+builder.Services.AddSingleton<IDocumentExtractor, PdfExtractor>();
+builder.Services.AddSingleton<IDocumentExtractor, ExcelExtractor>();
+builder.Services.AddHostedService<ImportProcessor>();
+
 builder.Services.AddAntiforgery();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
@@ -71,5 +78,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcN
 
 app.MapAuthEndpoints();
 app.MapDocumentEndpoints();
+app.MapImportEndpoints();
 
 app.Run();

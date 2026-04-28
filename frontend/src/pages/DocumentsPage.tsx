@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, DuplicateError } from '../lib/api'
 import type { Document } from '../types/documents'
+import ImportRunsTab from './ImportRunsTab'
 import styles from './DocumentsPage.module.css'
 
 function formatBytes(bytes: number) {
@@ -20,13 +21,14 @@ function TypeBadge({ type }: { type: Document['documentType'] }) {
   return <span className={`${styles.typeBadge} ${cls}`}>{label}</span>
 }
 
-export default function DocumentsPage() {
+function DocumentsTab() {
   const qc = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState('')
   const [includeArchived, setIncludeArchived] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [uploadMsg, setUploadMsg] = useState<{ type: 'success' | 'error' | 'duplicate'; text: string } | null>(null)
+  const [importMsg, setImportMsg] = useState<{ docId: string; text: string } | null>(null)
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ['documents', search, includeArchived],
@@ -61,6 +63,17 @@ export default function DocumentsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents'] }),
   })
 
+  const importMutation = useMutation({
+    mutationFn: (docId: string) => api.imports.create(docId),
+    onSuccess: (run, docId) => {
+      qc.invalidateQueries({ queryKey: ['imports'] })
+      setImportMsg({ docId, text: `Import gestartet (ID: ${run.id.slice(0, 8)}…)` })
+    },
+    onError: (err, docId) => {
+      setImportMsg({ docId, text: `Fehler: ${err.message}` })
+    },
+  })
+
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files || files.length === 0) return
     setUploadMsg(null)
@@ -79,9 +92,8 @@ export default function DocumentsPage() {
   const onDragLeave = () => setDragging(false)
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Dokumente</h1>
+    <>
+      <div className={styles.subHeader}>
         <button className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
           Datei hochladen
         </button>
@@ -157,45 +169,97 @@ export default function DocumentsPage() {
           </thead>
           <tbody>
             {docs.map((doc) => (
-              <tr key={doc.id} className={doc.isArchived ? styles.archived : ''}>
-                <td>{doc.displayName}</td>
-                <td><TypeBadge type={doc.documentType} /></td>
-                <td>{formatBytes(doc.fileSizeBytes)}</td>
-                <td><span className={styles.hashText}>{doc.contentHash.slice(0, 12)}…</span></td>
-                <td>{formatDate(doc.createdAtUtc)}</td>
-                <td>
-                  <div className={styles.actions}>
-                    <button
-                      className={styles.btnSmall}
-                      onClick={() => api.documents.download(doc.id)}
-                      title="Herunterladen"
-                    >
-                      ↓
-                    </button>
-                    {doc.isArchived ? (
+              <>
+                <tr key={doc.id} className={doc.isArchived ? styles.archived : ''}>
+                  <td>{doc.displayName}</td>
+                  <td><TypeBadge type={doc.documentType} /></td>
+                  <td>{formatBytes(doc.fileSizeBytes)}</td>
+                  <td><span className={styles.hashText}>{doc.contentHash.slice(0, 12)}…</span></td>
+                  <td>{formatDate(doc.createdAtUtc)}</td>
+                  <td>
+                    <div className={styles.actions}>
                       <button
                         className={styles.btnSmall}
-                        onClick={() => unarchiveMutation.mutate(doc.id)}
-                        title="Wiederherstellen"
+                        onClick={() => api.documents.download(doc.id)}
+                        title="Herunterladen"
                       >
-                        ↺
+                        ↓
                       </button>
-                    ) : (
-                      <button
-                        className={`${styles.btnSmall} ${styles.btnDanger}`}
-                        onClick={() => archiveMutation.mutate(doc.id)}
-                        title="Archivieren"
-                      >
-                        Archiv
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
+                      {!doc.isArchived && (
+                        <button
+                          className={`${styles.btnSmall} ${styles.btnImport}`}
+                          onClick={() => { setImportMsg(null); importMutation.mutate(doc.id) }}
+                          disabled={importMutation.isPending}
+                          title="Import starten"
+                        >
+                          Import
+                        </button>
+                      )}
+                      {doc.isArchived ? (
+                        <button
+                          className={styles.btnSmall}
+                          onClick={() => unarchiveMutation.mutate(doc.id)}
+                          title="Wiederherstellen"
+                        >
+                          ↺
+                        </button>
+                      ) : (
+                        <button
+                          className={`${styles.btnSmall} ${styles.btnDanger}`}
+                          onClick={() => archiveMutation.mutate(doc.id)}
+                          title="Archivieren"
+                        >
+                          Archiv
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+                {importMsg?.docId === doc.id && (
+                  <tr key={`${doc.id}-msg`}>
+                    <td colSpan={6}>
+                      <span className={styles.importMsg}>{importMsg.text}</span>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
       )}
+    </>
+  )
+}
+
+type Tab = 'documents' | 'imports'
+
+export default function DocumentsPage() {
+  const [activeTab, setActiveTab] = useState<Tab>('documents')
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Dokumentenverwaltung</h1>
+      </div>
+
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${activeTab === 'documents' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('documents')}
+        >
+          Dateien
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === 'imports' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('imports')}
+        >
+          Importläufe
+        </button>
+      </div>
+
+      <div className={styles.tabContent}>
+        {activeTab === 'documents' ? <DocumentsTab /> : <ImportRunsTab />}
+      </div>
     </div>
   )
 }
