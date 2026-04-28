@@ -13,72 +13,77 @@ Write-Host "   Workspace: $root" -ForegroundColor DarkCyan
 Write-Host "  ============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# --- 1. Prozesse beenden ---
-Write-Host "1/5  Stoppe laufende MixingAI-Prozesse ..." -ForegroundColor Cyan
+# ---------------------------------------------------------------------------
+# 1. Alle laufenden Instanzen beenden
+# ---------------------------------------------------------------------------
+Write-Host "1/5  Stoppe alle laufenden MixingAI-Instanzen ..." -ForegroundColor Cyan
 
-# dotnet.exe Prozesse die MixingAI.Api ausfuehren
-try {
-    $dotnetProcs = Get-CimInstance Win32_Process -Filter "Name = 'dotnet.exe'" |
-        Where-Object { $_.CommandLine -like '*MixingAI.Api*' }
-    foreach ($p in $dotnetProcs) {
-        Write-Host "  Stop dotnet PID $($p.ProcessId) (MixingAI.Api) ..." -ForegroundColor Yellow
-        Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
-    }
-} catch {
-    Write-Host "  Warnung: dotnet-Prozesse konnten nicht geprueft werden." -ForegroundColor DarkYellow
+# Alle dotnet.exe (in Dev nur unser Backend)
+$killed = 0
+Get-Process -Name dotnet -ErrorAction SilentlyContinue | ForEach-Object {
+    Write-Host "  Stop dotnet  PID $($_.Id)" -ForegroundColor Yellow
+    $_ | Stop-Process -Force -ErrorAction SilentlyContinue
+    $killed++
 }
 
-# node.exe / npm fuer das Frontend (vite dev server)
-try {
-    $nodeProcs = Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" |
-        Where-Object { $_.CommandLine -like '*mixingai*' -or $_.CommandLine -like '*\frontend\*' }
-    foreach ($p in $nodeProcs) {
-        Write-Host "  Stop node PID $($p.ProcessId) (Frontend) ..." -ForegroundColor Yellow
-        Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
-    }
-} catch {
-    Write-Host "  Warnung: node-Prozesse konnten nicht geprueft werden." -ForegroundColor DarkYellow
+# Alle node.exe (vite dev-server)
+Get-Process -Name node -ErrorAction SilentlyContinue | ForEach-Object {
+    Write-Host "  Stop node    PID $($_.Id)" -ForegroundColor Yellow
+    $_ | Stop-Process -Force -ErrorAction SilentlyContinue
+    $killed++
 }
 
-# Prozesse auf Port 5085 (Backend) und 5173 (Frontend) per Port-Scan
+# cmd.exe-Fenster die zu unserem Projekt gehoeren (Backend- oder Frontend-Shell)
+Get-CimInstance Win32_Process -Filter "Name = 'cmd.exe'" -ErrorAction SilentlyContinue |
+    Where-Object {
+        $cl = $_.CommandLine
+        $cl -like "*MixingAI*" -or
+        $cl -like "*$root*" -or
+        $cl -like "*ConnectionStrings*" -or
+        ($cl -like "*npm*" -and $cl -like "*dev*")
+    } |
+    ForEach-Object {
+        Write-Host "  Stop cmd     PID $($_.ProcessId)" -ForegroundColor Yellow
+        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+        $killed++
+    }
+
+# Port-basierte Absicherung: alles was noch auf 5085 / 5173 lauscht
 foreach ($port in @(5085, 5173)) {
-    $netLines = netstat -ano 2>$null | Select-String ":$port\s.*LISTENING"
-    foreach ($line in $netLines) {
-        $pid = ($line -split '\s+') | Select-Object -Last 1
-        if ($pid -match '^\d+$' -and [int]$pid -gt 0) {
-            Write-Host "  Port $port: Stop PID $pid ..." -ForegroundColor Yellow
-            Stop-Process -Id ([int]$pid) -Force -ErrorAction SilentlyContinue
+    $lines = & netstat -ano | Select-String ":${port}\s+.*LISTENING"
+    foreach ($line in $lines) {
+        $parts = ($line.ToString().Trim() -split '\s+')
+        $procId = $parts[-1]
+        if ($procId -match '^\d+$' -and [int]$procId -gt 0) {
+            Write-Host "  Port ${port}:  Stop PID $procId" -ForegroundColor Yellow
+            Stop-Process -Id ([int]$procId) -Force -ErrorAction SilentlyContinue
+            $killed++
         }
     }
 }
 
-# cmd.exe-Fenster die MixingAI-Sessions sind
-try {
-    $cmdProcs = Get-CimInstance Win32_Process -Filter "Name = 'cmd.exe'" |
-        Where-Object { $_.CommandLine -like '*MixingAI*' }
-    foreach ($p in $cmdProcs) {
-        Write-Host "  Stop cmd PID $($p.ProcessId) (MixingAI-Session) ..." -ForegroundColor Yellow
-        Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
-    }
-} catch {}
+if ($killed -gt 0) {
+    Start-Sleep -Seconds 2
+}
+Write-Host "  Erledigt ($killed Prozesse beendet)." -ForegroundColor Green
 
-Start-Sleep -Seconds 2
-Write-Host "  Erledigt." -ForegroundColor Green
-
-# --- 2. dotnet Build-Server ---
+# ---------------------------------------------------------------------------
+# 2. dotnet Build-Server
+# ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "2/5  dotnet Build-Server herunterfahren ..." -ForegroundColor Cyan
-try {
-    dotnet build-server shutdown 2>$null | Out-Null
-    Write-Host "  Erledigt." -ForegroundColor Green
-} catch {
-    Write-Host "  (kein Build-Server aktiv)" -ForegroundColor DarkGray
-}
+$prev = $ErrorActionPreference
+$ErrorActionPreference = "SilentlyContinue"
+& dotnet build-server shutdown | Out-Null
+$ErrorActionPreference = $prev
+Write-Host "  Erledigt." -ForegroundColor Green
 
-# --- 3. Docker ---
+# ---------------------------------------------------------------------------
+# 3. Docker
+# ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "3/5  Docker-Container neu starten (PostgreSQL + Ollama) ..." -ForegroundColor Cyan
-docker compose -f "$root\docker-compose.dev.yml" down 2>$null | Out-Null
+docker compose -f "$root\docker-compose.dev.yml" down | Out-Null
 docker compose -f "$root\docker-compose.dev.yml" up -d
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
@@ -90,14 +95,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "  Container gestartet." -ForegroundColor Green
 
-# --- 4. Warte auf PostgreSQL ---
+# ---------------------------------------------------------------------------
+# 4. Warte auf PostgreSQL
+# ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "4/5  Warte auf PostgreSQL ..." -ForegroundColor Cyan
 $attempts = 0
 do {
     Start-Sleep -Seconds 2
     $attempts++
-    docker compose -f "$root\docker-compose.dev.yml" exec -T postgres pg_isready -U postgres 2>$null | Out-Null
+    & docker compose -f "$root\docker-compose.dev.yml" exec -T postgres pg_isready -U postgres | Out-Null
 } while ($LASTEXITCODE -ne 0 -and $attempts -lt 30)
 
 if ($LASTEXITCODE -ne 0) {
@@ -106,7 +113,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "  PostgreSQL bereit." -ForegroundColor Green
 
-# --- 5. Backend + Frontend starten ---
+# ---------------------------------------------------------------------------
+# 5. Backend + Frontend starten
+# ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "5/5  Backend und Frontend starten ..." -ForegroundColor Cyan
 
