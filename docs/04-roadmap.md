@@ -7,7 +7,7 @@ Ziele:
 - Repo-Struktur anlegen
 - Architektur dokumentieren
 - Tech-Stack festlegen
-- erpforai-Uebernahme schneiden
+- Architekturentscheidungen dokumentieren
 - Deployment-Zielsetup fuer amixon-VM dokumentieren
 - UI-/Shared-Shell-Leitplanken dokumentieren
 - Datenmodell-Inputfaktoren dokumentieren

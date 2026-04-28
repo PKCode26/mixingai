@@ -32,7 +32,7 @@ Der Windows-Fileserver ist nur Quelle fuer die initiale Migration. Nach der Uebe
 
 - [Architektur](docs/01-architektur.md)
 - [Tech-Stack](docs/02-tech-stack.md)
-- [Uebernahme aus erpforai](docs/03-erpforai-uebernahme.md)
+- [Architekturentscheidungen](docs/03-architekturentscheidungen.md)
 - [Roadmap](docs/04-roadmap.md)
 - [Umgebungsvariablen](docs/05-umgebungsvariablen.md)
 - [Grundsatzentscheidungen](docs/06-grundsatzentscheidungen.md)

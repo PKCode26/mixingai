@@ -2,8 +2,6 @@
 
 ## Empfehlung
 
-Der Stack soll nah an `erpforai` bleiben, aber fachlich deutlich kleiner sein.
-
 ```text
 Frontend:   React + TypeScript
 Backend:    ASP.NET Core / .NET 10
@@ -29,9 +27,8 @@ Empfohlen:
 
 Warum:
 
-- `erpforai` nutzt bereits .NET 10, EF Core und PostgreSQL.
-- Auth-/Rechte-Pattern kann uebernommen und vereinfacht werden.
-- PostgreSQL passt gut fuer relationale Rezeptdaten, Volltextsuche und optional Vektorsuche.
+- .NET 10, EF Core und PostgreSQL passen gut zusammen.
+- PostgreSQL eignet sich fuer relationale Rezeptdaten, Volltextsuche und optional Vektorsuche.
 
 ## Frontend
 

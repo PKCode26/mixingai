@@ -74,7 +74,7 @@ Die interne Anwendung ist erreichbar, Benutzer koennen sich anmelden und die Sha
 
 Massnahmen:
 
-- einfache User-/Session-Logik aus `erpforai` ableiten
+- einfache User-/Session-Logik implementieren
 - Login/Logout/Me-Endpunkte bauen
 - Seed-User fuer Entwicklung anlegen
 - Shared Shell implementieren

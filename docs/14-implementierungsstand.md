@@ -1,127 +1,113 @@
 # Implementierungsstand
 
-Dieses Dokument beschreibt den aktuellen technischen Stand im Repo und gleicht ihn mit dem Massnahmenplan ab.
+Stand: nach Phase 1–4 (Document Vault + Import Gate).
 
-Stand: nach erstem Scaffold und Auth-/Shell-Start.
-
-## Vorhanden
-
-### Backend
-
-Pfad:
-
-```text
-backend/MixingAI.Api
-```
-
-Vorhanden:
+## Phase 1 — Projekt-Scaffold `erledigt`
 
 - ASP.NET Core 10 WebAPI
-- EF Core + Npgsql
-- `AppDbContext`
-- Initial-Migration fuer User/Auth
-- `User`
-- `AuthSession`
-- `PasswordHashingService`
-- `SessionTokenService`
-- `CurrentUserService`
-- Login/Logout/Me-Endpunkte unter `/api/auth`
-- HttpOnly-Session-Cookie
-- Rate Limiting fuer Auth
-- Development Seed fuer Admin/User
+- React + TypeScript + Vite Frontend
+- Docker Compose fuer lokale Entwicklung (`docker-compose.dev.yml`)
+- Docker Compose fuer Produktion/Pilot (`docker-compose.yml`)
+- Nginx-Konfiguration mit HTTP->HTTPS-Redirect und TLS-Skeleton
+- `.env.example` als Vorlage
+- PostgreSQL auf Port 5433 (dev) um Konflikt mit lokalem Windows-Postgres zu vermeiden
+- Startscript `start-dev.bat` + `scripts/start-dev.ps1`
+
+## Phase 2 — Basis-App `erledigt`
+
+Backend:
+
+- `User`, `AuthSession`, `AuditableEntity`
+- `PasswordHashingService` (ASP.NET PasswordHasher)
+- `SessionTokenService` (SHA256-Hash des Tokens)
+- `CurrentUserService` (Token aus Cookie oder Bearer-Header)
+- Login / Logout / Me unter `/api/auth`
+- Rate Limiting fuer Auth-Endpunkte
+- HttpOnly-Cookie `mixingai_auth`
+- Development-Seed fuer Admin- und Test-Benutzer
 - Health-Endpunkt `/health`
+- EF Core + Npgsql + Migrationen mit `IF NOT EXISTS` SQL
 
-Noch nicht vorhanden:
+Frontend:
 
-- Document Vault
-- Datei-Upload
-- Storage-Service
-- Import-Gate
-- Review-Funktion
-- Trial-/Recipe-Datenmodell
-- Ollama-Backend-Service
-- OCR-Provider
+- Login-Seite mit Fehlerbehandlung
+- Protected Route (Weiterleitung auf Login ohne Session)
+- Shared Shell (AppShell + Navigation)
+- Startseite mit Kacheln
+- Platzhalterseiten fuer Versuche und Admin
 
-### Frontend
+## Phase 3 — Document Vault `erledigt`
 
-Pfad:
+Backend:
 
-```text
-frontend
-```
+- `Document`-Entity (OriginalFileName, DisplayName, MimeContentType, FileSizeBytes, ContentHash, StoragePath, DocumentType, IsArchived)
+- `StorageService`: Upload, SHA256-Hash, relative Pfade, Download-Stream, Loeschen, GetFullPath
+- Duplikatserkennung per SHA256-Hash (409 Conflict mit Verweis auf vorhandene Datei)
+- Archivieren / Wiederherstellen (kein hartes Loeschen)
+- 6 Endpunkte unter `/api/documents`: upload, list (Suche + Archivfilter), get, download, archive, unarchive
+- Migration `AddDocuments` (IF NOT EXISTS)
 
-Vorhanden:
+Frontend:
 
-- React + TypeScript + Vite
-- React Router
-- TanStack Query
-- Login-Seite
-- Protected Route
-- Shared Shell
-- Startseite
-- Platzhalterseiten fuer Dokumente, Versuche und Admin
+- `DocumentsPage` mit Drag-and-Drop-Uploadzone
+- Dateiliste mit Typbadge, Hash-Vorschau, Datum, Aktionsbuttons
+- Duplikatsmeldung mit Verweis auf vorhandene Datei
+- Suche nach Dateiname, Archivierungsfilter
 
-Noch zu pruefen/anzupassen:
+## Phase 4 — Import Gate `erledigt (Infrastruktur)`
 
-- Keine Sidebar beibehalten
-- Kachelstartseite gegen UI-Leitplanken pruefen
-- zweite Navigationsebene fuer Dokumente/Review/Versuche bauen
-- Design minimal und amixon-orientiert halten
+Backend:
 
-### Deployment / Infrastruktur
+- Entities: `ImportRun`, `StagedField` (Key-Value, flexibel), `ValidationIssue`
+- Status: Queued, Extracting, NeedsReview, Approved, Published, Archived, Failed, Rejected, NeedsRework
+- `ImportProcessor` als BackgroundService (alle 4s, max. 5 Runs gleichzeitig)
+- `IDocumentExtractor` als Schnittstelle fuer Extraktoren
+- `PdfExtractor` (PdfPig): Textlayer zeilenweise, Quellverweis `Seite:N`
+- `ExcelExtractor` (ClosedXML): Label-Wert-Paare aus Nachbarzellen, Quellverweis `Sheet:Name,Zelle:A1`
+- `FieldPatternMatcher`: 17 Regex-Regeln fuer amixon-Versuchsprotokoll-Struktur + Dateiname-Parser
+- 9 Endpunkte unter `/api/imports`: create, list, get, staged, issues, approve, reject, rework, confirm field
+- Migration `AddImportRuns` (IF NOT EXISTS)
 
-Vorhanden:
+Frontend:
 
-- `docker-compose.dev.yml` fuer lokale PostgreSQL- und Ollama-Container
-- `docker-compose.yml` fuer Pilot/Produktion
-- Nginx-Konfiguration mit HTTP->HTTPS Redirect
-- Nginx TLS Skeleton fuer `mixingai.amixon.local`
-- persistente Volume-Ziele unter `/srv/mixingai`
-- `.env.example` mit Development- und Compose-Variablen
-
-Noch offen:
-
-- TLS-Zertifikat aus amixon-Umgebung
-- NVIDIA Container Runtime auf Ziel-VM pruefen
-- konkrete Ollama-Modelle
-- Backup-Script
-- Restore-Test
+- `DocumentsPage` jetzt mit zwei Tabs: **Dateien** | **Importläufe**
+- Button „Import starten" pro Dokument-Zeile
+- `ImportRunsTab`:
+  - Tabelle aller Importlaeufe mit Status-Badges (Queued, Extracting, NeedsReview, Approved, Failed…)
+  - aufklappbare Staged-Fields-Panels pro Run (Feldname, Wert, Konfidenz, Quellverweis)
+  - Validierungsprobleme als Warnleiste
+  - „Freigeben" / „Ablehnen"-Buttons fuer Runs im Status NeedsReview oder NeedsRework
+  - Volltext-Akkordeon (RawText versteckt, aufklappbar)
+  - Auto-Refresh alle 5s (Extracting -> NeedsReview live sichtbar)
+- `types/imports.ts` + `api.imports.*` in `api.ts`
 
 ## Readiness-Abgleich
 
 | Phase | Status | Kommentar |
 | --- | --- | --- |
-| 1 Projekt-Scaffold | teilweise erledigt | Backend, Frontend, Docker, Nginx und Env sind angelegt. Build/Start muss noch verifiziert und dokumentiert werden. |
-| 2 Basis-App | teilweise erledigt | Login, Auth-Grundlage und Shared Shell existieren. UI-Leitplanken noch gegen Umsetzung pruefen. |
-| 3 Document Vault | offen | Naechster groesserer Implementierungsschritt. |
-| 4 Import-Gate | offen | Abhaengig von Document Vault. |
-| 5 Review-Maske | offen | Zentraler MVP-Screen. |
-| 6 Datenmodell stabilisieren | offen | Nach ersten Dokumentmustern. |
-| 7 Suche und Filter | offen | Nach Trial-Datenmodell. |
-| 8 Excel-Export | offen | Nach Suche/Filter. |
-| 9 On-Prem KI mit Ollama | offen | Nach Suche/Filter; Service-Schnittstelle vorbereiten. |
-| 10 OCR-Provider | offen | Nach echten PDF-Beispielen. |
-| 11 Deployment | offen | Compose/Nginx Skeleton existiert, Zielbetrieb noch nicht validiert. |
-| 12 Pilotdaten | offen | Nur on-prem mit echten Daten. |
+| 1 Scaffold | erledigt | Backend, Frontend, Docker, Nginx, Env, Startscript |
+| 2 Basis-App | erledigt | Login, Auth, Protected Route, Shared Shell |
+| 3 Document Vault | erledigt | Upload, Hash, Dubletten, Archiv, Download |
+| 4 Import Gate | erledigt (Infrastruktur) | Extraktor-Pipeline, BackgroundService, Staging, 9 Endpunkte, Frontend mit Tabs und Review-Aktionen |
+| 5 Review-Maske | offen | Vollstaendige Review-Detailseite mit Dokumentvorschau links + Feldern rechts fehlt noch |
+| 6 Datenmodell stabilisieren | offen | Nach ersten echten Dokumenten |
+| 7 Suche und Filter | offen | Nach Datenmodell |
+| 8 Excel-Export | offen | Nach Suche/Filter |
+| 9 On-Prem KI mit Ollama | offen | Nach Suche/Filter |
+| 10 OCR-Provider | offen | Nach echten gescannten PDFs |
+| 11 Deployment | offen | Compose/Nginx Skeleton vorhanden, Zielbetrieb noch nicht validiert |
+| 12 Pilotdaten | offen | Nur on-prem mit echten Daten |
 
-## Naechste sinnvolle technische Schritte
+## Naechste sinnvolle Schritte
 
-1. Build und Start lokal verifizieren.
-2. README-Startbefehle gegen Ist-Zustand pruefen.
-3. Untracked Dateien bewusst behandeln:
-   - `.claude/`
-   - `backend/MixingAI.Api/.dockerignore`
-4. Document Vault implementieren:
-   - `Document`
-   - `DocumentVersion`
-   - Storage-Service
-   - Upload
-   - Hash/Dublettencheck
-   - Dokumentliste
-5. Danach Import-Gate und Review-Maske beginnen.
+1. Echte Versuchsdokumente importieren und `FieldPatternMatcher` nachschaerfen.
+2. Review-Detailseite (Phase 5): Dokumentvorschau links, Felder rechts, Pflichtfelder markieren.
+3. Produktives Datenmodell aus Staging-Ergebnissen ableiten (Trial/Recipe-Schema).
+4. OCR-Pfad evaluieren sobald gescannte PDFs vorhanden.
 
-## Hinweis zu erpforai-Uebernahme
+## Bekannte Einschraenkungen
 
-Die Auth-Grundlage ist bereits sichtbar aus dem `erpforai`-Pattern abgeleitet und fuer MixingAI vereinfacht.
-
-Die DMS-Uebernahme steht noch aus. Sie soll nicht als ERP-DMS kopiert werden, sondern als schlanker Document Vault umgesetzt werden.
+- `FieldPatternMatcher` ist auf amixon-Versuchsprotokoll-Struktur zugeschnitten; andere Dokumenttypen brauchen eigene Regeln.
+- Gescannte PDFs (kein Textlayer) erzeugen einen Hinweis im Staging, werden aber nicht extrahiert.
+- Review-Tab zeigt Felder als Tabelle; noch kein Side-by-Side mit Dokumentvorschau.
+- Migrationen nutzen Raw-SQL mit `IF NOT EXISTS` (Workaround fuer Npgsql 10 Transaktions-Bug bei `ExecuteNonQuery`).

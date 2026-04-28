@@ -28,7 +28,7 @@ Auth__CookieName=mixingai_auth
 Auth__SessionDays=7
 ```
 
-Das Cookie bleibt HttpOnly. Die genaue Implementierung wird aus dem `erpforai`-Auth-Pattern abgeleitet und fuer MixingAI vereinfacht.
+Das Cookie bleibt HttpOnly.
 
 ## Feature Flags
 
