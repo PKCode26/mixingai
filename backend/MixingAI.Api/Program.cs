@@ -1,3 +1,4 @@
+using MixingAI.Api.Core.Ai;
 using MixingAI.Api.Core.Endpoints;
 using MixingAI.Api.Core.Import;
 using MixingAI.Api.Core.Import.Extraction;
@@ -44,6 +45,8 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
+builder.Services.AddHttpClient("ollama");
+builder.Services.AddSingleton<IOllamaService, OllamaService>();
 builder.Services.AddSingleton<StorageService>();
 
 builder.Services.AddSingleton<IDocumentExtractor, PdfExtractor>();

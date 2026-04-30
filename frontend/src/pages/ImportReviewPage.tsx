@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
-import type { StagedField } from '../types/imports'
+import type { StagedField, OllamaStatus } from '../types/imports'
 import styles from './ImportReviewPage.module.css'
 
 const BASE = '/api'
@@ -84,7 +84,8 @@ export default function ImportReviewPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const [ocrMsg, setOcrMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [ocrMsg,  setOcrMsg]  = useState<{ ok: boolean; text: string } | null>(null)
+  const [aiMsg,   setAiMsg]   = useState<{ ok: boolean; text: string } | null>(null)
 
   const { data: run, isLoading: runLoading } = useQuery({
     queryKey: ['imports', id],
@@ -115,6 +116,11 @@ export default function ImportReviewPage() {
     queryFn: () => api.imports.ocrStatus(),
   })
 
+  const { data: ollamaStatus } = useQuery({
+    queryKey: ['ollama', 'status'],
+    queryFn: () => api.imports.ollamaStatus(),
+  })
+
   const approveMutation = useMutation({
     mutationFn: () => api.imports.approve(id!),
     onSuccess: () => {
@@ -138,6 +144,15 @@ export default function ImportReviewPage() {
       setOcrMsg({ ok: true, text: `OCR abgeschlossen: ${res.fieldsFound} Felder erkannt auf ${res.pagesProcessed} Seiten.` })
     },
     onError: err => setOcrMsg({ ok: false, text: `OCR fehlgeschlagen: ${err.message}` }),
+  })
+
+  const analyzeMutation = useMutation({
+    mutationFn: () => api.imports.analyze(id!),
+    onSuccess: res => {
+      qc.invalidateQueries({ queryKey: ['imports', id, 'staged'] })
+      setAiMsg({ ok: true, text: `KI-Analyse abgeschlossen: ${res.fieldsFound} Felder erkannt.` })
+    },
+    onError: (err: Error) => setAiMsg({ ok: false, text: `KI-Analyse fehlgeschlagen: ${err.message}` }),
   })
 
   const visibleFields = fields.filter(f => !f.fieldKey.startsWith('_'))
@@ -174,6 +189,16 @@ export default function ImportReviewPage() {
         </div>
         <div className={styles.headerActions}>
           <button
+            className={`${styles.btn} ${styles.btnAi}`}
+            onClick={() => { setAiMsg(null); analyzeMutation.mutate() }}
+            disabled={analyzeMutation.isPending || !ollamaStatus?.isAvailable}
+            title={ollamaStatus?.isAvailable
+              ? `KI-Analyse mit ${ollamaStatus.modelName}`
+              : (ollamaStatus?.message ?? 'Ollama nicht verfügbar')}
+          >
+            {analyzeMutation.isPending ? 'KI analysiert…' : '✦ KI-Analyse'}
+          </button>
+          <button
             className={`${styles.btn} ${styles.btnOcr}`}
             onClick={() => { setOcrMsg(null); ocrMutation.mutate() }}
             disabled={ocrMutation.isPending || !ocrStatus?.isAvailable}
@@ -202,6 +227,12 @@ export default function ImportReviewPage() {
           )}
         </div>
       </div>
+
+      {aiMsg && (
+        <div className={`${styles.alert} ${aiMsg.ok ? styles.alertAi : styles.alertError}`}>
+          {aiMsg.text}
+        </div>
+      )}
 
       {ocrMsg && (
         <div className={`${styles.alert} ${ocrMsg.ok ? styles.alertSuccess : styles.alertError}`}>

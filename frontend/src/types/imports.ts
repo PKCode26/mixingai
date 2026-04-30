@@ -50,3 +50,16 @@ export interface OcrStatus {
   isAvailable: boolean
   message: string | null
 }
+
+export interface OllamaStatus {
+  isAvailable: boolean
+  modelName: string
+  message: string | null
+}
+
+export interface OllamaAnalysisResult {
+  success: boolean
+  errorMessage: string | null
+  fieldsFound: number
+  fields: StagedField[]
+}

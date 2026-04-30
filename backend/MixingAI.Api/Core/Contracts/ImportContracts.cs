@@ -42,3 +42,11 @@ public record ExtractedImageResponse(
     long FileSizeBytes);
 
 public record OcrStatusResponse(bool IsAvailable, string? Message);
+
+public record OllamaStatusResponse(bool IsAvailable, string ModelName, string? Message);
+
+public record OllamaAnalysisResponse(
+    bool Success,
+    string? ErrorMessage,
+    int FieldsFound,
+    IReadOnlyList<StagedFieldResponse> Fields);

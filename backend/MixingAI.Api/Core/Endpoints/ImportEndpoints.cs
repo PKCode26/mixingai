@@ -1,3 +1,4 @@
+using MixingAI.Api.Core.Ai;
 using MixingAI.Api.Core.Contracts;
 using MixingAI.Api.Core.Import;
 using MixingAI.Api.Core.Import.Extraction;
@@ -27,6 +28,8 @@ public static class ImportEndpoints
         group.MapGet("{id:guid}/images/{imageId:guid}", ServeImageAsync);
         group.MapPost("{id:guid}/ocr", TriggerOcrAsync);
         group.MapGet("ocr/status", GetOcrStatusAsync);
+        group.MapPost("{id:guid}/analyze", AnalyzeWithOllamaAsync);
+        group.MapGet("ollama/status", GetOllamaStatusAsync);
         return app;
     }
 
@@ -314,6 +317,76 @@ public static class ImportEndpoints
     private static IResult GetOcrStatusAsync(IOcrProvider ocr) =>
         Results.Ok(new OcrStatusResponse(ocr.IsAvailable,
             ocr.IsAvailable ? null : "OCR-Provider nicht konfiguriert"));
+
+    private static IResult GetOllamaStatusAsync(IOllamaService ollama) =>
+        Results.Ok(new OllamaStatusResponse(
+            ollama.IsAvailable,
+            ollama.ModelName,
+            ollama.IsAvailable ? null : "Ollama nicht konfiguriert"));
+
+    private static async Task<IResult> AnalyzeWithOllamaAsync(
+        Guid id, HttpContext ctx, AppDbContext db, IOllamaService ollama,
+        CurrentUserService currentUser, ILogger<ImportProcessor> logger, CancellationToken ct)
+    {
+        var user = await currentUser.GetCurrentUserAsync(ctx, db, ct);
+        if (user is null) return Results.Unauthorized();
+
+        if (!ollama.IsAvailable)
+            return Results.Problem(
+                detail: "Ollama ist nicht konfiguriert.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+
+        var run = await db.ImportRuns.FirstOrDefaultAsync(r => r.Id == id, ct);
+        if (run is null) return Results.NotFound();
+
+        // Rohtext aus Staging holen (bevorzuge OCR-Text, fallback auf PDF-Text)
+        var rawField = await db.StagedFields
+            .Where(f => f.ImportRunId == id && (f.FieldKey == "_RawText_OCR" || f.FieldKey == "_RawText"))
+            .OrderByDescending(f => f.FieldKey) // _RawText_OCR zuerst
+            .FirstOrDefaultAsync(ct);
+
+        if (rawField is null || string.IsNullOrWhiteSpace(rawField.FieldValue))
+            return Results.BadRequest("Kein extrahierter Text vorhanden. Bitte erst Dokument importieren.");
+
+        var result = await ollama.ExtractAsync(rawField.FieldValue, ct);
+
+        if (!result.Success)
+            return Results.Problem(detail: result.ErrorMessage, statusCode: 500);
+
+        // Vorhandene KI-Felder für diesen Run ersetzen
+        var existing = await db.StagedFields
+            .Where(f => f.ImportRunId == id && f.SourceRef == "KI")
+            .ToListAsync(ct);
+        db.StagedFields.RemoveRange(existing);
+
+        var added = new List<StagedField>();
+        foreach (var (key, value) in result.Fields)
+        {
+            if (key.StartsWith('_')) continue;
+            var field = new StagedField
+            {
+                ImportRunId = id,
+                FieldKey    = key,
+                FieldValue  = value,
+                Confidence  = 0.75f,
+                SourceRef   = "KI",
+            };
+            db.StagedFields.Add(field);
+            added.Add(field);
+        }
+
+        if (run.Status is ImportRunStatus.Failed or ImportRunStatus.Queued)
+            run.SetNeedsReview(DateTime.UtcNow);
+
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("Ollama-Analyse für ImportRun {Id}: {Count} Felder.", id, added.Count);
+
+        var responses = added
+            .Select(f => new StagedFieldResponse(f.Id, f.FieldKey, f.FieldValue, f.Confidence, f.SourceRef, f.IsConfirmed))
+            .ToList();
+
+        return Results.Ok(new OllamaAnalysisResponse(true, null, added.Count, responses));
+    }
 
     private static ImportRunResponse ToRunResponse(
         ImportRun run, string docName, int fieldCount, int issueCount) =>

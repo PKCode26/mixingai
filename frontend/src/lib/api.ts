@@ -1,6 +1,6 @@
 import type { AuthUser, LoginRequest, LoginResponse } from '../types/auth'
 import type { Document, DocumentDuplicateError } from '../types/documents'
-import type { ImportRun, StagedField, ValidationIssue, ExtractedImage, OcrStatus } from '../types/imports'
+import type { ImportRun, StagedField, ValidationIssue, ExtractedImage, OcrStatus, OllamaStatus, OllamaAnalysisResult } from '../types/imports'
 
 const BASE = '/api'
 
@@ -114,5 +114,10 @@ export const api = {
       request<{ fieldsFound: number; pagesProcessed: number }>(`/imports/${runId}/ocr`, { method: 'POST' }),
 
     ocrStatus: () => request<OcrStatus>('/imports/ocr/status'),
+
+    analyze: (runId: string) =>
+      request<OllamaAnalysisResult>(`/imports/${runId}/analyze`, { method: 'POST' }),
+
+    ollamaStatus: () => request<OllamaStatus>('/imports/ollama/status'),
   },
 }
