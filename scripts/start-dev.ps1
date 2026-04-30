@@ -18,20 +18,24 @@ Write-Host ""
 # ---------------------------------------------------------------------------
 Write-Host "1/5  Stoppe alle laufenden MixingAI-Instanzen ..." -ForegroundColor Cyan
 
-# Alle dotnet.exe (in Dev nur unser Backend)
+# Nur MixingAI-dotnet-Prozesse beenden (nicht andere Projekte!)
 $killed = 0
-Get-Process -Name dotnet -ErrorAction SilentlyContinue | ForEach-Object {
-    Write-Host "  Stop dotnet  PID $($_.Id)" -ForegroundColor Yellow
-    $_ | Stop-Process -Force -ErrorAction SilentlyContinue
-    $killed++
-}
+Get-CimInstance Win32_Process -Filter "Name = 'dotnet.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -like '*MixingAI*' } |
+    ForEach-Object {
+        Write-Host "  Stop dotnet  PID $($_.ProcessId) (MixingAI.Api)" -ForegroundColor Yellow
+        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+        $killed++
+    }
 
-# Alle node.exe (vite dev-server)
-Get-Process -Name node -ErrorAction SilentlyContinue | ForEach-Object {
-    Write-Host "  Stop node    PID $($_.Id)" -ForegroundColor Yellow
-    $_ | Stop-Process -Force -ErrorAction SilentlyContinue
-    $killed++
-}
+# Nur node-Prozesse beenden die zu unserem Frontend gehoeren
+Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -like "*$root*" -or $_.CommandLine -like '*mixingai*' } |
+    ForEach-Object {
+        Write-Host "  Stop node    PID $($_.ProcessId) (MixingAI-Frontend)" -ForegroundColor Yellow
+        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+        $killed++
+    }
 
 # cmd.exe-Fenster die zu unserem Projekt gehoeren (Backend- oder Frontend-Shell)
 Get-CimInstance Win32_Process -Filter "Name = 'cmd.exe'" -ErrorAction SilentlyContinue |
