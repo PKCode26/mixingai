@@ -15,7 +15,8 @@ public sealed class ImportRun : AuditableEntity
     public ICollection<StagedField> StagedFields { get; init; } = [];
     public ICollection<ValidationIssue> ValidationIssues { get; init; } = [];
 
-    public void SetExtracting() => Status = ImportRunStatus.Extracting;
+    public void SetExtracting()  => Status = ImportRunStatus.Extracting;
+    public void ResetToQueued()  => Status = ImportRunStatus.Queued;
 
     public void SetNeedsReview(DateTime utcNow)
     {

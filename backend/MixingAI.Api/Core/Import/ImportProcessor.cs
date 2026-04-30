@@ -14,6 +14,7 @@ public sealed class ImportProcessor(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("ImportProcessor gestartet.");
+        await ResetStuckRunsAsync(stoppingToken);
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -26,6 +27,22 @@ public sealed class ImportProcessor(
             }
             await Task.Delay(TimeSpan.FromSeconds(4), stoppingToken);
         }
+    }
+
+    private async Task ResetStuckRunsAsync(CancellationToken ct)
+    {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var stuck = await db.ImportRuns
+            .Where(r => r.Status == ImportRunStatus.Extracting)
+            .ToListAsync(ct);
+        foreach (var run in stuck)
+        {
+            run.ResetToQueued();
+            logger.LogWarning("ImportRun {Id} war beim Start im Status Extracting – zurück auf Queued.", run.Id);
+        }
+        if (stuck.Count > 0)
+            await db.SaveChangesAsync(ct);
     }
 
     private async Task ProcessQueuedRunsAsync(CancellationToken ct)
