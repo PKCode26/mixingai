@@ -223,6 +223,12 @@
   overflow: hidden;
 }
 
+.paneHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .fieldCount {
   font-size: 0.8rem;
   font-weight: 400;
@@ -231,6 +237,36 @@
   letter-spacing: 0;
 }
 
+.missingBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Error issues (missing required fields) */
+.issuesListError {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+}
+
+.issueError {
+  font-size: 0.82rem;
+  color: #b91c1c;
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Warning issues */
 .issuesList {
   flex-shrink: 0;
   padding: 0.5rem 1rem;
@@ -275,6 +311,39 @@
 
 .fieldRow:hover { background: #f9fafb; }
 .fieldRowConfirmed { background: #f0fdf4; }
+
+.fieldRowMissing {
+  background: #fef2f2;
+  border-left: 3px solid #f87171;
+}
+.fieldRowMissing:hover { background: #fee2e2; }
+
+.fieldValueMissing {
+  font-size: 0.82rem;
+  color: #ef4444;
+  font-style: italic;
+  padding: 0.1rem 0.3rem;
+}
+
+.requiredBadge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+}
+
+.requiredBadgeFound {
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+}
 
 .fieldMeta {
   display: flex;

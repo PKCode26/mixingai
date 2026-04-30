@@ -7,6 +7,14 @@ import styles from './ImportReviewPage.module.css'
 
 const BASE = '/api'
 
+const REQUIRED_FIELDS = new Set([
+  'Datum',
+  'Versuchsnummer',
+  'Kunde',
+  'Mischzeit',
+  'Gesamtmenge',
+])
+
 const STATUS_LABELS: Record<string, string> = {
   Queued: 'Warteschlange', Extracting: 'Extraktion…', NeedsReview: 'Review nötig',
   Approved: 'Freigegeben', Published: 'Publiziert', Archived: 'Archiviert',
@@ -133,6 +141,18 @@ export default function ImportReviewPage() {
   })
 
   const visibleFields = fields.filter(f => !f.fieldKey.startsWith('_'))
+  const foundKeys = new Set(visibleFields.map(f => f.fieldKey))
+  const missingRequired = [...REQUIRED_FIELDS].filter(k => !foundKeys.has(k))
+
+  // Required fields first, then optional — sorted alphabetically within each group
+  const sortedFields = [
+    ...visibleFields.filter(f => REQUIRED_FIELDS.has(f.fieldKey)).sort((a, b) => a.fieldKey.localeCompare(b.fieldKey)),
+    ...visibleFields.filter(f => !REQUIRED_FIELDS.has(f.fieldKey)).sort((a, b) => a.fieldKey.localeCompare(b.fieldKey)),
+  ]
+
+  const errorIssues = issues.filter(i => i.severity === 'Error')
+  const warnIssues  = issues.filter(i => i.severity !== 'Error')
+
   const canReview = run?.status === 'NeedsReview' || run?.status === 'NeedsRework'
   const docDownloadUrl = run ? `${BASE}/documents/${run.documentId}/download` : ''
 
@@ -167,6 +187,7 @@ export default function ImportReviewPage() {
                 className={`${styles.btn} ${styles.btnApprove}`}
                 onClick={() => approveMutation.mutate()}
                 disabled={approveMutation.isPending}
+                title={missingRequired.length > 0 ? `${missingRequired.length} Pflichtfeld(er) fehlen` : undefined}
               >
                 ✓ Freigeben
               </button>
@@ -222,7 +243,6 @@ export default function ImportReviewPage() {
             </div>
           )}
 
-          {/* Extracted images */}
           {images.length > 0 && (
             <div className={styles.imagesSection}>
               <div className={styles.imagesSectionTitle}>Extrahierte Bilder ({images.length})</div>
@@ -247,12 +267,32 @@ export default function ImportReviewPage() {
         <div className={styles.fieldsPane}>
           <div className={styles.paneHeader}>
             Extrahierte Felder
-            <span className={styles.fieldCount}>{visibleFields.length} Felder</span>
+            <div className={styles.paneHeaderRight}>
+              {missingRequired.length > 0 && (
+                <span className={styles.missingBadge}>
+                  {missingRequired.length} Pflichtfeld{missingRequired.length > 1 ? 'er' : ''} fehlt{missingRequired.length === 1 ? '' : 'en'}
+                </span>
+              )}
+              <span className={styles.fieldCount}>{visibleFields.length} Felder</span>
+            </div>
           </div>
 
-          {issues.length > 0 && (
+          {/* Error issues (missing required fields) */}
+          {errorIssues.length > 0 && (
+            <div className={styles.issuesListError}>
+              {errorIssues.map(i => (
+                <div key={i.id} className={styles.issueError}>
+                  <span className={styles.issueSeverity}>Fehler</span>
+                  {i.message}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Warning issues */}
+          {warnIssues.length > 0 && (
             <div className={styles.issuesList}>
-              {issues.map(i => (
+              {warnIssues.map(i => (
                 <div key={i.id} className={styles.issue}>
                   <span className={styles.issueSeverity}>{i.severity}</span>
                   {i.message}
@@ -261,17 +301,33 @@ export default function ImportReviewPage() {
             </div>
           )}
 
-          {visibleFields.length === 0 ? (
+          {visibleFields.length === 0 && missingRequired.length === 0 ? (
             <p className={styles.noFields}>
               Keine Felder extrahiert.
               {!ocrStatus?.isAvailable && ' OCR ist nicht konfiguriert.'}
             </p>
           ) : (
             <div className={styles.fieldList}>
-              {visibleFields.map(field => (
+              {/* Missing required fields as placeholder rows */}
+              {missingRequired.map(key => (
+                <div key={`missing-${key}`} className={`${styles.fieldRow} ${styles.fieldRowMissing}`}>
+                  <div className={styles.fieldMeta}>
+                    <span className={styles.fieldKey}>{key}</span>
+                    <span className={styles.requiredBadge}>PFLICHT</span>
+                    <span className={styles.sourceRef} />
+                  </div>
+                  <div className={styles.fieldValueMissing}>Nicht erkannt — bitte manuell eintragen</div>
+                </div>
+              ))}
+
+              {/* Extracted fields */}
+              {sortedFields.map(field => (
                 <div key={field.id} className={`${styles.fieldRow} ${field.isConfirmed ? styles.fieldRowConfirmed : ''}`}>
                   <div className={styles.fieldMeta}>
                     <span className={styles.fieldKey}>{field.fieldKey}</span>
+                    {REQUIRED_FIELDS.has(field.fieldKey) && (
+                      <span className={styles.requiredBadgeFound}>PFLICHT</span>
+                    )}
                     <span className={`${styles.confidence} ${CONFIDENCE_CLASS(field.confidence)}`}>
                       {formatConfidence(field.confidence)}
                     </span>

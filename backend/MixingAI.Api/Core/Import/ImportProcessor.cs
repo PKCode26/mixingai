@@ -105,6 +105,22 @@ public sealed class ImportProcessor(
             });
         }
 
+        // Pflichtfeld-Validierung
+        var extractedKeys = result.Fields.Select(f => f.Key).ToHashSet(StringComparer.Ordinal);
+        foreach (var requiredKey in FieldPatternMatcher.RequiredFieldKeys)
+        {
+            if (!extractedKeys.Contains(requiredKey))
+            {
+                db.ValidationIssues.Add(new ValidationIssue
+                {
+                    ImportRunId = run.Id,
+                    Severity    = IssueSeverity.Error,
+                    FieldKey    = requiredKey,
+                    Message     = $"Pflichtfeld '{requiredKey}' wurde nicht erkannt.",
+                });
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(result.RawText))
         {
             db.StagedFields.Add(new StagedField

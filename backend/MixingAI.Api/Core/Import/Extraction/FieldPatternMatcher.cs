@@ -8,6 +8,15 @@ namespace MixingAI.Api.Core.Import.Extraction;
 /// </summary>
 public static partial class FieldPatternMatcher
 {
+    public static readonly IReadOnlySet<string> RequiredFieldKeys = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "Datum",
+        "Versuchsnummer",
+        "Kunde",
+        "Mischzeit",
+        "Gesamtmenge",
+    };
+
     // Feldname → Key (sortiert nach Priorität/Spezifität)
     private static readonly (string Pattern, string Key, float Confidence)[] Rules =
     [

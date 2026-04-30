@@ -69,10 +69,10 @@ Empfohlen:
 Startschemas:
 
 ```text
-app_core      -- User, Rollen, Rechte, Audit
+app_core      -- User, Sessions, Audit
 app_dms       -- Dokumente, Versionen, Dateien, OCR-Text
 app_import    -- Importlaeufe, Staging, Validierungen
-app_recipe    -- Versuche, Rezepte, Rohstoffe, Rezeptpositionen, Eigenschaften
+app_domain    -- fachliche Daten: Versuche, Rezepte, Rohstoffe, Positionen, Parameter
 app_ai        -- KI-Konfiguration, Chatverlauf optional, Tool-Logs
 ```
 
@@ -173,7 +173,8 @@ Wichtige Testarten:
 ## Sicherheitsgrundsaetze
 
 - HttpOnly Session Cookie
-- Rollen-/Rechtepruefung im Backend
+- einfache Session-Pruefung im Backend
+- keine komplexe Rollen-/Rechteverwaltung im MVP
 - Audit-Log fuer Datenfreigaben und Aenderungen
 - Upload-Dateitypen whitelisten
 - Dateipfade nie direkt vom Client verwenden

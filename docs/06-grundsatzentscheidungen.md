@@ -96,11 +96,11 @@ Die vorliegende Beispiel-Dokumentation beschreibt Versuchsprotokolle, aber diese
 
 Sie wird als Startpunkt fuer die Ordnung genutzt, nicht als starres Schema.
 
-### Fachliches Kernobjekt
+### Fachlicher Kern noch offen
 
-Neben Rezepten braucht das System ein Objekt fuer Versuche bzw. Versuchsprotokolle.
+Das System braucht eine fachliche Klammer fuer Versuchsprotokolle, Rezepturen, Prozessparameter, Messwerte und Dokumentquellen. Ob diese Klammer im produktiven Datenmodell hauptsaechlich `Trial`/Versuch, `Recipe`/Rezeptur oder eine Mischform ist, wird erst nach Sichtung echter Dokumente entschieden.
 
-Moegliche Struktur:
+Moegliche Trial-Struktur, falls der Versuch die fuehrende Klammer bildet:
 
 ```text
 Trial / Versuch
@@ -120,6 +120,22 @@ Trial / Versuch
   -> Dokumentquelle
   -> optionale Rezeptdaten
   -> optionale Prozessparameter
+  -> optionale Ergebnis-/Pruefwerte
+```
+
+Moegliche Recipe-Struktur, falls Rezepturen der fuehrende Such- und Vergleichsanker sind:
+
+```text
+Recipe / Rezeptur
+  -> Rezeptkennung oder Bezug zum Versuch
+  -> Produkt
+  -> Rezeptpositionen / Bestandteile
+  -> Menge roh aus Dokument
+  -> Menge normalisiert
+  -> Einheit
+  -> Toleranz / Zielwert falls vorhanden
+  -> Prozessparameter
+  -> Dokumentquelle
   -> optionale Ergebnis-/Pruefwerte
 ```
 
@@ -157,6 +173,8 @@ Da Protokolle nicht immer gleich aufgebaut sind, braucht der Import:
 - Quellenverweis je erkanntem Wert
 - Review statt automatischer Wahrheit
 - flexible Feldgruppen fuer seltene Zusatzinformationen
+- klare Trennung zwischen Staging und freigegebenem Fachmodell
+- Rohwerte und normalisierte Werte getrennt speichern
 
 ## Noch zu klaeren
 
@@ -170,7 +188,7 @@ Festgelegt fuer den MVP:
 - PDF-Dokument als Versuchsprotokoll erfassen
 - Excel-Uebersicht importieren oder referenzieren
 - gute Review-Maske fuer eingelesene Daten gegen Originaldokument
-- einfache Versuchsdatenbank
+- einfache fachliche Datenbank fuer Versuche/Rezepturen
 - Rezept-/Mischdaten falls vorhanden
 - Suche/Filter nach Kunde, Produkt, Versuch, Maschine, Mischertyp
 - Excel-Export mit Quellenverweisen

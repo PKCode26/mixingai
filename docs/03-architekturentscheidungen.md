@@ -71,6 +71,12 @@ Umgesetzt:
 - `Confidence` und `SourceRef` pro Feld fuer Rueckverfolgbarkeit
 - `IsConfirmed` als Reviewer-Zustimmung pro Feld
 
+Einordnung:
+
+- `StagedField` ist bewusst nur Import-/Review-Zwischenschicht.
+- Suche, Export und KI sollen spaeter auf freigegebenen Fachdaten und Textsegmenten laufen, nicht direkt auf beliebigen Staging-Feldern.
+- `SourceRef` ist fuer den MVP ein einfacher lesbarer Quellenhinweis; fuer das produktive Datenmodell wird ein strukturierter Quellen-/Provenienzdatensatz benoetigt.
+
 Statusmodell fuer `ImportRun`:
 
 ```
@@ -82,7 +88,7 @@ Queued -> Extracting -> NeedsReview -> Approved -> Published
 
 Warum kein festes Rezept-Schema sofort:
 
-Das Feldmodell der Versuchsprotokolle ist erst mit echten Daten final definierbar. Das flexible Staging-Modell erlaubt es, real vorkommende Felder zuerst zu sichten und dann das produktive Schema daraus abzuleiten.
+Das Feldmodell der Versuchsprotokolle ist erst mit echten Daten final definierbar. Das flexible Staging-Modell erlaubt es, real vorkommende Felder zuerst zu sichten und dann das produktive Schema daraus abzuleiten. Ob der fachliche Schwerpunkt am Ende staerker auf Versuch, Rezeptur oder einer Mischform liegt, bleibt bis zur Sichtung echter Daten offen.
 
 ## Extraktion
 
@@ -115,6 +121,21 @@ app_core.import_runs         -- Importlaeufe pro Dokument
 app_core.staged_fields       -- extrahierte Rohfelder (Key-Value)
 app_core.validation_issues   -- Warnungen/Fehler pro Importlauf
 ```
+
+Geplante naechste Modellschicht:
+
+```text
+app_dms.document_text_segments  -- OCR-/Volltext je Seite, Zelle oder Textblock
+app_import.extraction_sources   -- strukturierte Quellen fuer extrahierte Werte
+app_domain.*                    -- freigegebene Fachdaten nach Review
+```
+
+Wichtig fuer numerische Werte:
+
+- Rohwert aus dem Dokument speichern, z.B. `1,5 %`
+- normalisierten Zahlenwert separat speichern, z.B. `1.5`
+- Einheit separat speichern, z.B. `%`
+- Validierungsstatus speichern, falls Dezimaltrennzeichen, Einheit oder Groessenordnung unsicher sind
 
 Migrationen:
 

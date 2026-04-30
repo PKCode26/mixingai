@@ -1,6 +1,6 @@
 # Implementierungsstand
 
-Stand: nach Phase 1–4 (Document Vault + Import Gate).
+Stand: nach Phase 1–5 (Document Vault + Import Gate + Review-Maske).
 
 ## Phase 1 — Projekt-Scaffold `erledigt`
 
@@ -59,11 +59,13 @@ Frontend:
 Backend:
 
 - Entities: `ImportRun`, `StagedField` (Key-Value, flexibel), `ValidationIssue`
+- `StagedField` ist nur Import-/Review-Staging, nicht das finale Such- oder KI-Datenmodell
 - Status: Queued, Extracting, NeedsReview, Approved, Published, Archived, Failed, Rejected, NeedsRework
 - `ImportProcessor` als BackgroundService (alle 4s, max. 5 Runs gleichzeitig)
 - `IDocumentExtractor` als Schnittstelle fuer Extraktoren
 - `PdfExtractor` (PdfPig): Textlayer zeilenweise, Quellverweis `Seite:N`
 - `ExcelExtractor` (ClosedXML): Label-Wert-Paare aus Nachbarzellen, Quellverweis `Sheet:Name,Zelle:A1`
+- `SourceRef` ist aktuell ein lesbarer MVP-Quellenhinweis; ein strukturiertes Quellenmodell folgt mit dem produktiven Datenmodell
 - `FieldPatternMatcher`: 17 Regex-Regeln fuer amixon-Versuchsprotokoll-Struktur + Dateiname-Parser
 - 9 Endpunkte unter `/api/imports`: create, list, get, staged, issues, approve, reject, rework, confirm field
 - Migration `AddImportRuns` (IF NOT EXISTS)
@@ -89,25 +91,31 @@ Frontend:
 | 2 Basis-App | erledigt | Login, Auth, Protected Route, Shared Shell |
 | 3 Document Vault | erledigt | Upload, Hash, Dubletten, Archiv, Download |
 | 4 Import Gate | erledigt (Infrastruktur) | Extraktor-Pipeline, BackgroundService, Staging, 9 Endpunkte, Frontend mit Tabs und Review-Aktionen |
-| 5 Review-Maske | offen | Vollstaendige Review-Detailseite mit Dokumentvorschau links + Feldern rechts fehlt noch |
-| 6 Datenmodell stabilisieren | offen | Nach ersten echten Dokumenten |
-| 7 Suche und Filter | offen | Nach Datenmodell |
-| 8 Excel-Export | offen | Nach Suche/Filter |
-| 9 On-Prem KI mit Ollama | offen | Nach Suche/Filter |
-| 10 OCR-Provider | offen | Nach echten gescannten PDFs |
-| 11 Deployment | offen | Compose/Nginx Skeleton vorhanden, Zielbetrieb noch nicht validiert |
-| 12 Pilotdaten | offen | Nur on-prem mit echten Daten |
+| 5 Review-Maske | erledigt | Detailseite: PDF links, Felder rechts, editierbar, Confidence, Pflichtfelder, OCR-Pfad |
+| 6 Ollama-Analysebasis | offen | Lokale KI fuer Datenmodell-Vorschlaege vor echten Kundendaten |
+| 7 Datenmodell stabilisieren | offen | Nach Review + Ollama-gestuetzter Analyse echter Dokumente |
+| 8 Suche und Filter | offen | Nach Datenmodell |
+| 9 Excel-Export | offen | Nach Suche/Filter |
+| 10 Produkt-KI mit Ollama | offen | Nach Suche/Filter |
+| 11 OCR-Provider | offen | Nach echten gescannten PDFs |
+| 12 Deployment | offen | Compose/Nginx Skeleton vorhanden, Zielbetrieb noch nicht validiert |
+| 13 Pilotdaten | offen | Nur on-prem mit echten Daten |
 
 ## Naechste sinnvolle Schritte
 
 1. Echte Versuchsdokumente importieren und `FieldPatternMatcher` nachschaerfen.
-2. Review-Detailseite (Phase 5): Dokumentvorschau links, Felder rechts, Pflichtfelder markieren.
-3. Produktives Datenmodell aus Staging-Ergebnissen ableiten (Trial/Recipe-Schema).
-4. OCR-Pfad evaluieren sobald gescannte PDFs vorhanden.
+2. Pflichtfeld-Liste (`RequiredFieldKeys`) nach echten Kundendokumenten anpassen.
+3. Ollama-Analysebasis lokal/on-prem bereitstellen, wenn echte Kundendaten fuer Schema-Vorschlaege genutzt werden.
+4. Produktives Fachmodell aus Staging-Ergebnissen und KI-Vorschlaegen ableiten; Trial/Recipe-Schwerpunkt anhand echter Daten entscheiden.
+5. Quellen-/Provenienzmodell fuer produktive Werte festlegen.
+6. Rohwert-, Zahlenwert- und Einheitenmodell fuer Mengen/Parameter festlegen.
+7. OCR-Pfad evaluieren sobald gescannte PDFs vorhanden.
 
 ## Bekannte Einschraenkungen
 
 - `FieldPatternMatcher` ist auf amixon-Versuchsprotokoll-Struktur zugeschnitten; andere Dokumenttypen brauchen eigene Regeln.
 - Gescannte PDFs (kein Textlayer) erzeugen einen Hinweis im Staging, werden aber nicht extrahiert.
+- Volltext liegt aktuell als Staging-Feld vor; fuer Suche/KI sollte daraus ein Textsegmentmodell werden.
+- Zahlen und Einheiten werden aktuell als Text extrahiert; Normalisierung und Plausibilitaetsvalidierung folgen im Fachmodell.
 - Review-Tab zeigt Felder als Tabelle; noch kein Side-by-Side mit Dokumentvorschau.
 - Migrationen nutzen Raw-SQL mit `IF NOT EXISTS` (Workaround fuer Npgsql 10 Transaktions-Bug bei `ExecuteNonQuery`).

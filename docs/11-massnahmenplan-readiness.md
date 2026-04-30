@@ -10,30 +10,25 @@ Es ist bewusst als Massnahmenplan mit Readiness-Kriterien aufgebaut, nicht nur a
 Technische Basis
   -> Dokumente kontrolliert speichern
   -> Import und Review
+  -> lokale Ollama-Analysebasis fuer Datenmodell
   -> Datenmodell stabilisieren
   -> Suche und Export
-  -> KI anbinden
+  -> Produkt-KI anbinden
   -> Pilotbetrieb
 ```
 
-Die Review-Maske ist der zentrale Produktbaustein. KI kommt erst, wenn die Datenbasis und die Such-/Filterfunktionen funktionieren.
+Die Review-Maske ist der zentrale Produktbaustein. Die lokale Ollama-Laufzeit wird frueh als internes Analysewerkzeug gebraucht, damit echte on-prem Daten bei der Datenmodell-Findung helfen koennen. Der spaetere Nutzer-Chatbot kommt trotzdem erst, wenn Datenbasis und Such-/Filterfunktionen funktionieren.
 
 ## Aktueller Status
 
 Stand im Repo:
 
-- Phase 1 ist teilweise umgesetzt: Backend, Frontend, Docker Compose, Nginx Skeleton und Env-Vorlage existieren.
-- Phase 2 ist teilweise umgesetzt: Auth-Grundlage, Login, Protected Route und Shared Shell existieren.
-- Phase 3 ist der naechste groessere Schritt: Document Vault mit Upload, Storage, Hash und Dokumentliste.
-
-Offene untracked Dateien im Arbeitsbaum muessen separat entschieden werden:
-
-```text
-.claude/
-backend/MixingAI.Api/.dockerignore
-```
-
-Diese Doku nimmt sie nicht automatisch in den Commit auf.
+- Phase 1 ist umgesetzt: Backend, Frontend, Docker Compose, Nginx Skeleton, Env-Vorlage und Startscript existieren.
+- Phase 2 ist umgesetzt: Auth-Grundlage, Login, Protected Route und Shared Shell existieren.
+- Phase 3 ist umgesetzt: Document Vault mit Upload, Storage, Hash, Dublettenpruefung, Archiv und Dokumentliste existiert.
+- Phase 4 ist als Infrastruktur umgesetzt: Importlaeufe, flexible Staging-Felder, Validierungsissues, PDF-/Excel-Extraktion und Importstatus existieren.
+- Phase 5 ist der naechste groessere Schritt: Review-Detailseite mit Dokumentvorschau, Quellenbezug, Pflichtfeldlogik und kontrollierter Freigabe.
+- Phase 6 ist danach noetig: Ollama lokal/on-prem als Analysebasis anbinden, bevor echte Kundendaten fuer Schema-Vorschlaege genutzt werden.
 
 ## Phase 1: Projekt-Scaffold
 
@@ -103,7 +98,7 @@ PDF- und Excel-Dateien koennen kontrolliert in der Anwendung gespeichert werden.
 Massnahmen:
 
 - Dokument-Entity anlegen
-- Dokumentversion anlegen
+- Dokumentmetadaten fuer leichte Versionierung vorbereiten
 - Upload-Endpunkt fuer PDF/Excel
 - lokaler App-Storage
 - SHA256-Hash berechnen
@@ -111,6 +106,7 @@ Massnahmen:
 - Dokumentliste bauen
 - Download/Vorschau vorbereiten
 - leichte Versionierung abbilden
+- Originaldatei unveraendert im App-Storage halten
 
 Readiness:
 
@@ -147,7 +143,7 @@ Readiness:
 - Importstatus ist sichtbar
 - Fehler werden gespeichert
 - erkannte Werte landen im Staging
-- produktive Versuchsdaten bleiben unberuehrt
+- produktive Fachdaten bleiben unberuehrt
 
 Abhaengigkeiten:
 
@@ -178,24 +174,63 @@ Readiness:
 - Werte koennen korrigiert werden
 - fehlende Pflichtfelder sind sichtbar
 - Quellenverweis ist nachvollziehbar
-- Freigabe erzeugt produktive Daten
+- Freigabe erzeugt produktive Fachdaten
 
 Abhaengigkeiten:
 
 - Phase 4 abgeschlossen
 - mindestens synthetische Testdateien vorhanden
 
-## Phase 6: Erstes Datenmodell stabilisieren
+## Phase 6: Ollama-Analysebasis fuer Datenmodell
 
 Ziel:
 
-Das produktive Datenmodell fuer Versuche, Dokumente, Rezept-/Mischdaten und Quellen ist fuer den MVP ausreichend stabil.
+Ollama steht lokal/on-prem als Analysewerkzeug bereit, um aus echten Dokumenten, extrahierten Feldern und Textsegmenten Vorschlaege fuer das Datenmodell abzuleiten.
+
+Wichtig:
+
+Diese Phase ist nicht der Produkt-Chatbot. Sie dient nur der internen Schema-Findung und erzeugt Vorschlaege, keine produktiven Datenbankentscheidungen.
+
+Massnahmen:
+
+- Ollama-Service lokal/on-prem lauffaehig machen
+- Cloud-Funktionen deaktivieren und Netzwerkzugriff restriktiv halten
+- Chatmodell fuer Analysevorschlaege konfigurieren
+- Embeddingmodell optional fuer Feld-/Text-Clustering konfigurieren
+- Backend- oder Admin-Script fuer Schema-Analyse vorbereiten
+- Feldinventar aus `staged_fields` und Rohtexten erzeugen
+- KI-Vorschlaege fuer Tabellen, Felder, Feldtypen, Pflichtfelder und Validierungsregeln erzeugen
+- Ergebnisse als Vorschlag dokumentieren, nicht automatisch migrieren
+
+Readiness:
+
+- Ollama laeuft auf lokaler/on-prem Infrastruktur
+- keine echten Daten verlassen die amixon-Umgebung
+- Analyse kann mit extrahierten Feldern und Textausschnitten arbeiten
+- Vorschlaege enthalten Quellen/Beispiele
+- keine automatische Aenderung am produktiven Datenmodell
+
+Abhaengigkeiten:
+
+- Phase 4 abgeschlossen
+- Phase 5 hilfreich, weil Review-Ergebnisse bessere Trainings-/Analysebasis liefern
+- erste echte oder realistische Testdokumente verfuegbar
+
+## Phase 7: Erstes Datenmodell stabilisieren
+
+Ziel:
+
+Das produktive Datenmodell fuer Dokumente, Versuche, Rezept-/Mischdaten, Textsegmente und Quellen ist fuer den MVP ausreichend stabil.
+
+Der fachliche Schwerpunkt wird in dieser Phase festgelegt. Ob `Trial`/Versuch, `Recipe`/Rezeptur oder eine Mischform die fuehrende Klammer wird, ergibt sich aus echten Dokumenten und Suchzielen.
 
 Massnahmen:
 
 - echte Dokumentvarianten on-prem sichten
-- Trial-Modell schneiden
-- Document/Source-Modell pruefen
+- kanonisches Fachmodell schneiden
+- Document/Source-Modell pruefen und strukturiertes Quellenmodell festlegen
+- OCR-/Volltextsegmente modellieren
+- Rohwert-, Zahlenwert- und Einheitenmodell festlegen
 - Recipe/Material-Modell nur soweit noetig bauen
 - Pflichtfelder definieren
 - Indexe fuer Startfilter anlegen
@@ -203,43 +238,45 @@ Massnahmen:
 
 Readiness:
 
-- Versuche koennen produktiv gespeichert werden
+- erste Fachdaten koennen produktiv gespeichert werden
 - Dokumentquellen bleiben nachvollziehbar
 - Startfilter sind technisch abbildbar
+- Staging-Felder sind nicht das finale Suchmodell
 - neue Felder koennen spaeter ergaenzt werden
 - keine groben Schema-Annahmen blockieren echte Daten
 
 Abhaengigkeiten:
 
 - Phase 5 abgeschlossen
+- Phase 6 abgeschlossen, wenn echte Kundendaten fuer KI-gestuetzte Schema-Vorschlaege genutzt werden sollen
 - erste echte oder realistische Testdokumente verfuegbar
 
-## Phase 7: Suche und Filter
+## Phase 8: Suche und Filter
 
 Ziel:
 
-Benutzer koennen ohne KI nach Versuchen und relevanten Feldern suchen.
+Benutzer koennen ohne KI nach freigegebenen Fachdaten und relevanten Feldern suchen.
 
 Massnahmen:
 
-- Versuchsliste bauen
+- Fachdatensatzliste bauen, z.B. Versuchsliste oder Rezepturliste je nach festgelegtem Modell
 - Filter nach Kunde, Produkt, Versuchsnummer, Mischertyp, Baugroesse, Maschine, Zeitraum, Status
 - Volltextsuche fuer relevante Textfelder
-- Detailseite fuer Versuch
+- Detailseite fuer den fachlichen Datensatz
 - einfache Quellenanzeige
 
 Readiness:
 
 - Suchergebnisse sind stabil
 - Filter sind kombinierbar
-- Detailseite zeigt Versuch + Dokumentquelle
+- Detailseite zeigt Fachdaten + Dokumentquelle
 - Suche funktioniert ohne KI
 
 Abhaengigkeiten:
 
-- Phase 6 abgeschlossen
+- Phase 7 abgeschlossen
 
-## Phase 8: Excel-Export
+## Phase 9: Excel-Export
 
 Ziel:
 
@@ -260,13 +297,13 @@ Readiness:
 
 Abhaengigkeiten:
 
-- Phase 7 abgeschlossen
+- Phase 8 abgeschlossen
 
-## Phase 9: On-Prem KI mit Ollama
+## Phase 10: Produkt-KI mit Ollama
 
 Ziel:
 
-KI-Suche hilft bei der Bedienung, ohne Daten an externe Dienste zu senden.
+KI-Suche hilft dem Nutzer bei der Bedienung, ohne Daten an externe Dienste zu senden.
 
 Massnahmen:
 
@@ -288,11 +325,11 @@ Readiness:
 
 Abhaengigkeiten:
 
-- Phase 7 abgeschlossen
-- Phase 8 optional, aber hilfreich
+- Phase 8 abgeschlossen
+- Phase 9 optional, aber hilfreich
 - Modellwahl auf Zielhardware getestet
 
-## Phase 10: OCR-Provider festlegen
+## Phase 11: OCR-Provider festlegen
 
 Ziel:
 
@@ -319,7 +356,7 @@ Abhaengigkeiten:
 - echte Testdateien auf amixon-VM
 - Phase 4/5 nutzbar
 
-## Phase 11: Deployment vorbereiten
+## Phase 12: Deployment vorbereiten
 
 Ziel:
 
@@ -348,7 +385,7 @@ Abhaengigkeiten:
 - Infrastrukturzugriff auf amixon-VM
 - TLS-Zertifikat aus amixon-Umgebung
 
-## Phase 12: Pilotdaten und Abnahme
+## Phase 13: Pilotdaten und Abnahme
 
 Ziel:
 
@@ -374,7 +411,7 @@ Readiness:
 
 Abhaengigkeiten:
 
-- Phasen 1 bis 11 ausreichend abgeschlossen
+- Phasen 1 bis 12 ausreichend abgeschlossen
 
 ## Steuerungsansicht
 
@@ -385,13 +422,14 @@ Abhaengigkeiten:
 | 3 Document Vault | Dateien sauber gespeichert | Phase 2 |
 | 4 Import-Gate | Staging statt Direktimport | Phase 3 |
 | 5 Review | Daten gegen Quelle pruefbar | Phase 4 |
-| 6 Datenmodell | MVP-Schema stabil | Phase 5 + Testdaten |
-| 7 Suche | Filter ohne KI | Phase 6 |
-| 8 Export | Excel mit Quellen | Phase 7 |
-| 9 KI | Ollama-Suche mit Quellen | Phase 7 |
-| 10 OCR | lokaler OCR-Pfad | echte PDFs |
-| 11 Deployment | HTTPS-Betrieb | Infrastruktur |
-| 12 Pilot | echte Abnahme | alles davor |
+| 6 Ollama-Analyse | lokale KI fuer Schema-Vorschlaege | Phase 4/5 + Testdaten |
+| 7 Datenmodell | MVP-Schema stabil | Phase 5/6 + Testdaten |
+| 8 Suche | Filter ohne KI | Phase 7 |
+| 9 Export | Excel mit Quellen | Phase 8 |
+| 10 Produkt-KI | Ollama-Suche mit Quellen | Phase 8 |
+| 11 OCR | lokaler OCR-Pfad | echte PDFs |
+| 12 Deployment | HTTPS-Betrieb | Infrastruktur |
+| 13 Pilot | echte Abnahme | alles davor |
 
 ## Wichtigste Reihenfolge
 
@@ -401,9 +439,10 @@ Scaffold
   -> Upload + Document Vault
   -> Import-Gate
   -> Review-Maske
+  -> Ollama-Analysebasis
   -> Datenmodell stabilisieren
   -> Suche/Export
-  -> Ollama-KI
+  -> Produkt-KI mit Ollama
   -> OCR nach echten Daten
   -> Deployment/Pilot
 ```

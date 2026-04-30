@@ -4,6 +4,17 @@ Das endgueltige Datenmodell wird nicht aus Annahmen gebaut, sondern aus den real
 
 Diese Liste beschreibt, welche Informationen wir frueh sammeln muessen, um das Schema sauber zu schneiden.
 
+## Leitentscheidung offen
+
+Der fachliche Kern wird nicht vorab hart festgelegt. Ob `Trial`/Versuch, `Recipe`/Rezeptur oder eine Kombination daraus das fuehrende Objekt wird, ergibt sich aus:
+
+- was in den realen Dokumenten stabil wiederkehrt
+- wonach die Nutzer zuerst suchen und filtern
+- welche Daten im Review sicher bestaetigt werden koennen
+- welche Quellenbeziehungen spaeter im Export und in der KI-Antwort sichtbar sein muessen
+
+Das Import-Staging bleibt deshalb bewusst flexibler als das spaetere produktive Fachmodell.
+
 ## 1. Dokumentarten
 
 Zu klaeren:
@@ -21,7 +32,7 @@ Einfluss aufs Datenmodell:
 - `documents`
 - `document_versions`
 - `document_type`
-- Verknuepfung `trial -> document`
+- Verknuepfung `document -> fachliches Objekt` (Trial, Recipe oder Mischform; wird anhand echter Daten festgelegt)
 - optionale Anhaenge
 
 ## 2. Dokumentstruktur
@@ -41,7 +52,7 @@ Einfluss aufs Datenmodell:
 - flexible Staging-Felder
 - Quellenverweise mit Seite, Bounding Box, Tabelle, Zeile, Zelle
 - Pflichtfelder vs. optionale Felder
-- mehrere `trial_equipment` pro Versuch
+- mehrere Equipment-Zuordnungen pro fachlichem Datensatz, falls mehrere Geraete getestet werden
 
 ## 3. Identifikation eines Versuchs
 
@@ -246,6 +257,69 @@ Einfluss aufs Datenmodell:
 - `row_index`
 - `bounding_box`
 
+## 12a. OCR-Text und Freitext
+
+Zu klaeren:
+
+- Muss OCR-Text seitenweise oder blockweise gespeichert werden?
+- Sind Freitextbereiche fachlich Teil des Versuchs, der Rezeptur oder nur Dokumentnotizen?
+- Welche Freitexttypen kommen vor, z.B. Verarbeitungshinweis, Warnhinweis, Pruefnotiz, Kundenkommentar?
+- Muss der Nutzer spaeter ueber Freitext suchen koennen?
+- Soll die KI spaeter Freitext semantisch durchsuchen?
+
+Einfluss aufs Datenmodell:
+
+- `document_text_segments`
+- `text_type`
+- `document_id`
+- optionale Verknuepfung zu Trial/Recipe/Fachdatensatz
+- `page_number`, `sheet_name`, `cell_address`, `bounding_box`
+- Volltextindex und spaeter optional Vektorindex
+
+Grundsatz:
+
+Freitext wird nicht pauschal an eine Rezeptur gehaengt. Er bekommt einen eigenen Textsegment-/Notizdatensatz und wird nur dann mit Trial oder Recipe verknuepft, wenn diese Beziehung im Review klar ist.
+
+## 12b. Rohwerte, Normalisierung und Einheiten
+
+Zu klaeren:
+
+- Welche Dezimaltrennzeichen kommen vor?
+- Werden Prozent, Kilogramm, Gramm, Liter und Tonnen gemischt?
+- Werden Mengen absolut, relativ oder beides angegeben?
+- Gibt es Zielwert, Istwert, Toleranz und Grenzwert?
+- Welche Werte duerfen automatisch normalisiert werden?
+- Welche Werte brauchen manuelle Bestaetigung?
+
+Einfluss aufs Datenmodell:
+
+- `raw_value`
+- `numeric_value`
+- `unit`
+- `normalized_value`
+- `normalization_status`
+- `validation_issue`
+
+Grundsatz:
+
+OCR- oder Parserwerte werden nicht blind ueberschrieben. Ein Wert wie `1,5 %` bleibt als Rohwert erhalten; der normalisierte Zahlenwert wird separat gespeichert und muss bei Unsicherheit validiert werden.
+
+## 12c. Staging vs. Produktivschema
+
+Zu klaeren:
+
+- Welche Staging-Felder werden zu echten Spalten?
+- Welche bleiben flexible Attribute?
+- Welche Felder sind nur Importdiagnose?
+- Welche Quellen muessen nach Freigabe dauerhaft erhalten bleiben?
+
+Einfluss aufs Datenmodell:
+
+- `staged_fields` bleibt Import-/Review-Zwischenschicht
+- produktive Tabellen entstehen erst nach Review/Freigabe
+- `extraction_sources` oder `field_sources` verbinden produktive Werte mit Dokumentstellen
+- Startfilter bekommen echte Spalten oder indexierte Projektionen
+
 ## 13. Review und Freigabe
 
 Zu klaeren:
@@ -305,10 +379,14 @@ Einfluss aufs Datenmodell:
 2. Dokumentarten und Varianten klassifizieren.
 3. Pro Dokument 10 bis 20 erwartete Felder markieren.
 4. Suchfragen des Kunden danebenlegen.
-5. Erstes kanonisches Trial-/Recipe-Schema ableiten.
-6. Import-Staging bewusst flexibler bauen als produktive Tabellen.
-7. Review-Maske gegen echte Dokumente testen.
-8. Danach Migrationsschema stabilisieren.
+5. Lokales Ollama-Analysewerkzeug ueber Feldinventar und Textausschnitte laufen lassen.
+6. KI-Vorschlaege fachlich pruefen, nicht automatisch uebernehmen.
+7. Erstes kanonisches Fachschema ableiten; Trial/Recipe-Schwerpunkt erst anhand echter Daten entscheiden.
+8. Quellen-/Provenienzmodell fuer produktive Werte festlegen.
+9. Rohwert-, Zahlenwert- und Einheitenmodell fuer Mengen/Parameter festlegen.
+10. Import-Staging bewusst flexibler bauen als produktive Tabellen.
+11. Review-Maske gegen echte Dokumente testen.
+12. Danach Migrationsschema stabilisieren.
 
 ## Merksatz
 

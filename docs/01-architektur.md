@@ -39,30 +39,17 @@ MixingAI kopiert importierte Dateien in einen kontrollierten App-Storage. Damit 
 Aufgaben:
 
 - Login
-- Rollen und Rechte
 - Sitzungen
-- Zugriff auf Dokumente, Import, Review, Rezeptdaten und KI steuern
+- Zugriff auf die Anwendung fuer angemeldete Benutzer schuetzen
 - Audit-Informationen fuer Aenderungen speichern
 
-Empfohlene Startrollen:
+MVP-Regel:
 
-- Admin
-- Rezeptmanager
-- Pruefer
-- Leser
-
-Empfohlene Startrechte:
-
-- `admin.manage`
-- `document.upload`
-- `document.read`
-- `document.manage`
-- `import.review`
-- `recipe.read`
-- `recipe.manage`
-- `material.manage`
-- `analysis.run`
-- `ai.chat`
+- einfache Benutzeranmeldung
+- keine Gruppenverwaltung
+- keine fachliche Rechte-Matrix
+- alle angemeldeten Benutzer duerfen im MVP fachlich alles
+- optional `IsAdmin` nur fuer technische Administration
 
 ### 2. Ops / Datenqualitaet
 
@@ -79,7 +66,7 @@ Aufgaben:
 - Inkonsistenzen sichtbar machen
 - verhindern, dass ungepruefte Extraktionsergebnisse produktiv werden
 
-Wichtig: Es gibt eine klare Trennung zwischen Staging-Daten und freigegebenen Rezeptdaten.
+Wichtig: Es gibt eine klare Trennung zwischen Staging-Daten und freigegebenen Fachdaten.
 
 ### 3. DMS / Dokumentenarchiv
 
@@ -92,7 +79,7 @@ Aufgaben:
 - Versionen abbilden
 - Datei-Hash speichern
 - MIME-Type und Dateigroesse speichern
-- OCR-/Volltextdaten speichern
+- OCR-/Volltextdaten als Seiten oder Textsegmente speichern
 - Archivieren statt hart loeschen
 - Quellen fuer extrahierte Werte bereitstellen
 
@@ -108,11 +95,13 @@ Die Versuchs- und Rezeptdatenbank ist das fachliche Ziel des Imports.
 
 Versuchsprotokolle sind als flexible fachliche Quelle zu behandeln. Eine Beispielstruktur kann Felder wie Versuchsnummer, Kunde, Produkt, Aufgabenstellung, Testapparat, Mischertyp, Baugroesse, Fabrikatnummer, Sonderausstattung, Befuellung und Gesamtmenge enthalten. Diese Struktur ist ein Referenzpunkt, aber kein starres Schema fuer alle Altdokumente.
 
-Kernobjekte:
+Der fachliche Schwerpunkt wird nicht vorab hart festgelegt. Ob `Trial`/Versuch, `Recipe`/Rezeptur oder eine Kombination daraus das fuehrende Objekt wird, ergibt sich aus den echten Dokumenten, Suchzielen und Review-Ergebnissen.
 
-- Versuch / Trial
+Moegliche Kernobjekte:
+
+- Versuch / Trial, falls die Versuchsnummer und das Protokoll die fachliche Klammer bilden
 - Versuchsdokument
-- Rezept
+- Rezept, falls Rezepturen und Bestandteile der wichtigste Such- und Vergleichsanker sind
 - Rezeptversion
 - Rezeptposition
 - Rohstoff
@@ -120,6 +109,7 @@ Kernobjekte:
 - Einheit
 - Prozessparameter
 - Pruefwert / Eigenschaftswert
+- Freitext-/Textsegment
 - Quellenverweis
 
 Beispiele fuer Abfragen:
@@ -147,7 +137,7 @@ Aufgaben:
 - Prozessparameter pruefen
 - Pruefwerte pruefen
 - Dubletten oder neue Versionen erkennen
-- Daten fuer die Rezeptdatenbank freigeben
+- Daten fuer die fachliche Datenbank freigeben
 
 Statusmodell:
 
@@ -169,9 +159,14 @@ rejected
 needs_rework
 ```
 
-### 6. KI-Chatbot
+### 6. KI / Ollama
 
-Der Chatbot kommt zuletzt.
+Ollama wird in zwei Rollen betrachtet:
+
+- frueh als lokales Analysewerkzeug fuer Datenmodell-Vorschlaege aus echten on-prem Dokumenten
+- spaeter als Nutzer-Chatbot fuer Suche und Bedienhilfe
+
+Der Nutzer-Chatbot kommt zuletzt. Die fruehe Analyse-KI darf nur Vorschlaege erzeugen und keine produktiven Datenbankentscheidungen automatisch treffen.
 
 Regeln:
 
@@ -195,11 +190,11 @@ Beispiele fuer Backend-Tools:
 ```text
 Datei
   -> App-Storage
-  -> document_versions
+  -> documents
   -> import_runs
-  -> extraction_staging
+  -> staged_fields / document_text_segments
   -> Review
-  -> trials / recipes / recipe_versions / recipe_lines
+  -> kanonisches Fachmodell (Trial / Recipe / Material / Parameter)
   -> Suche / Vergleich / KI
 ```
 
@@ -207,16 +202,20 @@ Datei
 
 Extraktionsergebnisse sind Vorschlaege.
 
-Produktive Rezeptdaten entstehen erst nach Review/Freigabe. Dadurch koennen OCR-Fehler, falsche Tabellenbereiche, unklare Einheiten und Rohstoff-Synonyme abgefangen werden.
+`StagedField` ist nur die flexible Import- und Review-Zwischenschicht. Es ist nicht das finale Datenmodell fuer Suche, Export oder KI.
+
+Produktive Fachdaten entstehen erst nach Review/Freigabe. Dadurch koennen OCR-Fehler, falsche Tabellenbereiche, unklare Einheiten und Rohstoff-Synonyme abgefangen werden.
 
 ## Audit und Nachvollziehbarkeit
 
-Jede produktive Rezeptinformation sollte nachvollziehbar sein:
+Jede produktive Fachinformation sollte nachvollziehbar sein:
 
 - wer hat importiert?
 - aus welcher Datei?
 - aus welcher Version?
 - aus welcher Seite/Zelle/Tabelle?
+- aus welchem Textausschnitt oder welcher Bounding Box, sofern verfuegbar?
+- mit welcher Extraktionssicherheit?
 - wer hat geprueft?
 - wann wurde freigegeben?
 - was wurde korrigiert?

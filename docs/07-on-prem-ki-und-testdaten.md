@@ -14,6 +14,18 @@ Deshalb gilt:
 
 ## On-Prem-KI-Architektur
 
+Es gibt zwei getrennte KI-Einsatzarten:
+
+1. Fruehe interne Analysehilfe
+   - Ollama wird lokal genutzt, um echte on-prem Dokumente, extrahierte Felder und Textsegmente zu analysieren.
+   - Ziel ist ein Vorschlag fuer Datenmodell, Feldtypen, Pflichtfelder, Synonyme und Validierungsregeln.
+   - Diese Vorschlaege werden von Menschen geprueft und nicht automatisch als Migration umgesetzt.
+
+2. Spaeterer Produkt-Chatbot
+   - Nutzer koennen ueber freigegebene Daten suchen.
+   - Die KI greift nur ueber Backend-Tools auf Suchergebnisse und Quellen zu.
+   - Der Chatbot kommt erst nach stabilem Datenmodell und normaler Suche.
+
 ```text
 Frontend
   -> MixingAI Backend
